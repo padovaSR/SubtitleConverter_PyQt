@@ -177,7 +177,7 @@ class FileHandler:
                     if type(outfiles) is str:
                         enc = self.findEncoding(outfiles)
                         self.addFilePaths(outfiles, enc, rfiles)
-                        self.real_paths=rfiles
+                        self.real_path=rfiles
                     elif type(outfiles) is list:
                         for i in range(len(outfiles)):
                             enc = self.findEncoding(outfiles[i])
