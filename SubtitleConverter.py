@@ -185,9 +185,9 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         if len(file_paths) == 1:
             text = handler.singleFileInput()
             self.text_1.setPlainText(text)
-            if handler.file_encoding in ("utf-8", "utf-8-sig"):
-                if checkCyrillicAlphabet(text) is True:
-                    self.CYR = True
+            self.CYR = (
+                handler.file_encoding in ("windows-1251", "utf-8", "utf-8-sig")
+            ) and checkCyrillicAlphabet(text)
             if handler.real_path:
                 real_path = handler.real_path
                 self.status_1.setText(f"{basename(real_path)}")
@@ -245,7 +245,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         if action == "To ANSI":
             new_encoding = "windows-1250"
             ext = MAIN_SETTINGS["key5"]["lat_ansi_srt"]
-            if self.file_enc == "windows-1251" or self.CYR is True:
+            if self.CYR is  True:
                 if self.showMessage is True:
                     msg = ErrorDialog()
                     msg.exec()
@@ -261,14 +261,14 @@ class MainWindow(Ui_MainWindow, QMainWindow):
 
         if len(MULTI_FILE) <= 1:
             text = self.text_1.toPlainText()
-            handler = DocumentHandler(self.single_file, text, new_encoding, ext)
+            handler = DocumentHandler(self.single_file, text, new_encoding, ext, cyr=self.CYR)
             new_file_name = handler.write_new_file()
             handler.handleErrors(new_file_name)
             self.update_recent_menu(new_file_name)
         else:
             for file_item in MULTI_FILE:
                 text = normalizeText(file_item.enc, file_item.path)
-                handler = DocumentHandler(file_item.realpath, text, new_encoding, ext)
+                handler = DocumentHandler(file_item.realpath, text, new_encoding, ext, cyr=self.CYR)
                 new_file_name = handler.write_new_file(multi=True, ask=False)
                 self.new_files.append(new_file_name)
                 handler.handleErrors(new_file_name)
