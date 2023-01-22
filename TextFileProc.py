@@ -186,7 +186,7 @@ class FileHandler:
         
     def isCompressed(self, input_file):
 
-        basepath = 'tmp'
+        basepath = "tmp"
         # basepath = dirname(self.input_files)
         fileName = basename(input_file)
         
@@ -219,11 +219,12 @@ class FileHandler:
     
 class DocumentHandler:
     
-    def __init__(self, file_path=None, input_text=None, encoding=None, presuffix=None):
+    def __init__(self, file_path=None, input_text=None, encoding=None, presuffix=None, cyr=False):
         self.file_path = file_path
         self.input_text = input_text
         self.encoding = encoding
         self.presuffix = presuffix
+        self.cyr = cyr
 
     def write_new_file(self, multi=False, ask=True):
         new_name=self.newName()
@@ -339,7 +340,7 @@ class DocumentHandler:
     
         if name1.endswith("."):
             name1 = name1[:-1]
-    
+        
         for i in suffix_list:
             if i == "." or not i:
                 continue
@@ -349,6 +350,9 @@ class DocumentHandler:
                 name1 = "".join(name1.rsplit(i, count_s))
                 if not name1.endswith(i):
                     name1 = name1 + i
+        if self.cyr is True:
+            pre_ext = splitext(name1)[1].strip(".")
+            name1 = name1.replace(pre_ext, f"cyr_{pre_ext}")
         return normpath(join(dirname(file_path), f"{name1}{fsuffix}"))   ## Full path
             
     def WriteFile(self, text_in, file_path, multi=False, ask=True):
