@@ -1,0 +1,70 @@
+{
+    "Preferences": {
+        "utf8_txt": false,
+        "bom_utf8": false,
+        "preprocess": true,
+        "ShowLog": false
+    },
+    "key4": {
+        "new_font": "Segoe UI Semibold",
+        "fontSize": 10,
+        "fontColour": "#000068",
+        "weight": 63
+    },
+    "key5": {
+        "cyr_ansi_srt": "cyr",
+        "cyr_utf8_srt": "cyr_utf8",
+        "lat_utf8_srt": "utf8",
+        "transcribe": "changed",
+        "cyr_utf8_txt": "cyr_utf8",
+        "lat_ansi_srt": "lat",
+        "fixed_subs": "fixed",
+        "cleanup": "cln",
+        "Cyr-ansi": "Cyr-ansi",
+        "Lat-ansi": "Lat-ansi",
+        "Cyr-utf8": "Cyr-utf8",
+        "Lat-utf8": "Lat-utf8"
+    },
+    "key2": {
+        "l_lenght": 6000,
+        "m_char": 60,
+        "m_gap": 600,
+        "f_suffix": "_merged"
+    },
+    "key1": {
+        "nuliranje": false,
+        "breaks": false,
+        "kolor": false,
+        "italik": true,
+        "spejsevi": true,
+        "crtice_sp": true,
+        "crtice": true,
+        "linije": false,
+        "fixgap": true,
+        "shrinkgap": true,
+        "mingap": 62,
+        "maxgap": 320
+    },
+    "CB_value": "auto",
+    "FrameSize": {
+        "W": 593,
+        "H": 527
+    },
+    "added_ext": [
+        ".fixed",
+        "_merged",
+        ".utf8"
+    ],
+    "MultiSelection": {
+        "W": 918,
+        "H": 752
+    },
+    "ChoiceDialog": {
+        "W": 615,
+        "H": 512
+    },
+    "EksportZip": {
+        "W": 584,
+        "H": 525
+    }
+}
