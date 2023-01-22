@@ -91,7 +91,7 @@ class Ui_Dialog(object):
         font3.setBold(False)
         font3.setWeight(50)
         self.optiosText.setFont(font3)
-        self.optiosText.setText(u"Cyr to lat_ANSI&nbsp;&nbsp;&&nbsp;&nbsp;Cyr to lat_UTF8")
+        self.optiosText.setText(u"<font color='#0000d3'>Cyr to lat_ANSI</font>&nbsp;&nbsp;&&nbsp;&nbsp;<font color='#0000d3'>Cyr to lat_UTF8</font>")
         self.optiosText.setTextFormat(Qt.RichText)
         self.optiosText.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignTop)
         self.optiosText.setIndent(0)
