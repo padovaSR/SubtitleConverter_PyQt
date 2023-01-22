@@ -1,2 +1,2 @@
-"SubtitleConverter_PyQt" 
-# Work in progress
+# SubtitleConverter_PyQt
+## Work in progress
