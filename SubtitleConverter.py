@@ -183,9 +183,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             self.text_1.setPlainText(text)
             self.CYR = (
                 handler.file_encoding in ("windows-1251", "utf-8", "utf-8-sig")
-            ) and (
-                (handler.file_encoding != "windows-1251") or checkCyrillicAlphabet(text)
-            )
+            ) and checkCyrillicAlphabet(text)
             if handler.real_path:
                 real_path = handler.real_path
                 self.status_1.setText(f"{basename(real_path)}")
