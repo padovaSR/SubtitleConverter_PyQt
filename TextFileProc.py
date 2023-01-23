@@ -2,7 +2,7 @@
 #
 
 from resources.DictHandle import Dictionaries, lat_cir_mapa
-from settings import MAIN_SETTINGS, FILE_HISTORY, MULTI_FILE, lenZip
+from settings import MAIN_SETTINGS, MULTI_FILE
 from ChoiceDialog import MultiChoiceDialog
 
 import os
@@ -130,12 +130,8 @@ class FileHandler:
             logger.debug(f'ZIP archive: {basename(filepath)}')
             outfile, rfile = self.isCompressed(filepath) ## outfile in tmp
             if type(outfile) is str:
-                if lenZip(filepath):
-                    ## Append if not multiple
-                    FILE_HISTORY.append(lenZip(filepath))
                 self.file_encoding = self.findEncoding(outfile)
                 self.real_path=rfile
-                FILE_HISTORY.append(outfile)
                 return normalizeText(self.file_encoding, outfile)
             elif type(outfile) is list:
                 MULTI_FILE.clear()
@@ -150,7 +146,6 @@ class FileHandler:
                 logger.debug('FileHandler: Ready for multiple files.')
         elif not zipfile.is_zipfile(filepath):
             MULTI_FILE.clear()
-            FILE_HISTORY.append(filepath)
             self.file_encoding = self.findEncoding(filepath)
             self.real_path = filepath
             return normalizeText(self.file_encoding, filepath)
