@@ -43,12 +43,14 @@ def sortList(inlist):
     """"""
     return list(OrderedDict.fromkeys(inlist))
     
-with open(log_file_history, encoding="utf-8") as f:
-    for line in f:
-        line = line.strip()
-        if not line:
-            continue
-        FILE_HISTORY.append(line)
+def updateRecentFiles(file_list):
+    with open(log_file_history, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            if os.path.isfile(line):
+                file_list.append(line)
 
 def preSuffix():
     ''''''
