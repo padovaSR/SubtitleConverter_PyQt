@@ -479,12 +479,13 @@ class ErrorsHandler:
             
 class Transliteracija(DocumentHandler):
     
-    def __init__(self, file_path=None, input_text=None, encoding=None, presuffix=None, reversed_action=False):
+    def __init__(self, file_path=None, input_text=None, encoding=None, presuffix=None, reversed_action=False, cyr=False):
         self.file_path = file_path
         self.input_text = input_text
         self.encoding = encoding
         self.presuffix = presuffix
         self.reversed_action = reversed_action
+        self.cyr = cyr
         
     def write_utf8_file(self, multi=False, ask=False):
         """"""
