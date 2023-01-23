@@ -6,7 +6,7 @@ from PySide2.QtGui import QFont, QTextCharFormat, QColor, QTextCursor
 from PySide2.QtCore import Qt, QFileInfo, QDir, QEventLoop, QTimer
 
 from sc_gui import Ui_MainWindow
-from settings import MAIN_SETTINGS, MULTI_FILE, FILE_HISTORY, main_settings_file, log_file_history, printEncoding, sortList
+from settings import MAIN_SETTINGS, MULTI_FILE, main_settings_file, log_file_history, printEncoding, updateRecentFiles
 from MultiSelection import MultiFiles 
 from ChoiceDialog import MultiChoiceDialog
 from zip_confirm import ZipStructure
@@ -54,11 +54,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         
         self.text_1.setAcceptDrops(False)
         
-        for file_path in FILE_HISTORY:
-            if os.path.isfile(file_path):
-                self.recent_files.append(file_path)
-            else:
-                FILE_HISTORY.remove(file_path)        
+        updateRecentFiles(self.recent_files)
         self.update_recent_menu()
         
         self.actionOpen.triggered.connect(self.onOpen)
@@ -187,7 +183,9 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             self.text_1.setPlainText(text)
             self.CYR = (
                 handler.file_encoding in ("windows-1251", "utf-8", "utf-8-sig")
-            ) and checkCyrillicAlphabet(text)
+            ) and (
+                (handler.file_encoding != "windows-1251") or checkCyrillicAlphabet(text)
+            )
             if handler.real_path:
                 real_path = handler.real_path
                 self.status_1.setText(f"{basename(real_path)}")
@@ -486,7 +484,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         with open(main_settings_file, "w") as wf:
             wf.write(json.dumps(MAIN_SETTINGS, ensure_ascii=False, indent=4))
         shutil.copyfile(main_settings_file, main_settings_file+".bak")
-        self.writeFileHistory(FILE_HISTORY)
+        self.writeFileHistory(self.recent_files)
         self.removeTmpFiles()
         self.close()
         
@@ -505,10 +503,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
     def writeFileHistory(self, hfile_list):
         """"""
         logfile = open(log_file_history, "w", encoding="utf-8", newline="\r\n")
-        file_set = sortList(hfile_list)
-        if len(file_set) > 12:
-            file_set = file_set[-12:]
-        for paths in file_set:
+        for paths in hfile_list:
             if os.path.exists(paths):
                 logfile.write(normpath(paths) + "\n")
         logfile.close()
