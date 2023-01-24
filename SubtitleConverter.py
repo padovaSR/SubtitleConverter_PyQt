@@ -222,18 +222,15 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         surrogates_start, surrogates_ends = handler.findSurrogates()
         cursor = self.text_1.textCursor()
         cursor.setPosition(0)
-        # Create a QTextCharFormat for the highlighting
-        format = QTextCharFormat()
-        # Iterate over the errors
         for start,end in zip(surrogates_start, surrogates_ends):
-            format.setBackground(QColor("red"))
-            format.setForeground(QColor("white"))            
-            cursor.setCharFormat(format)
             cursor.setPosition(start)
             cursor.setPosition(end, QTextCursor.KeepAnchor)
             self.text_1.setTextCursor(cursor)
             loop = QEventLoop()
-            QTimer.singleShot(500, loop.quit)
+            if len(surrogates_start) < 35:
+                QTimer.singleShot(400, loop.quit)
+            else:
+                QTimer.singleShot(15, loop.quit)
             loop.exec_()            
             
     def changeEncoding(self):
