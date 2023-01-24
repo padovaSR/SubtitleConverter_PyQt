@@ -159,7 +159,7 @@ class FindReplaceDialog(Ui_Dialog, QDialog):
         cursor = self.text_edit.textCursor()
         previous_position = cursor.position()        
         if not replace_text:
-            self.text_edit.cut()
+            self.text_edit.insertPlainText("")
         else:
             if self.found:
                 cursor.insertText(replace_text)
