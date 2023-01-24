@@ -224,8 +224,8 @@ class DocumentHandler:
     def write_new_file(self, multi=False, ask=True):
         new_name=self.newName()
         text=self.rplStr(self.input_text)
-        self.WriteFile(text_in=text, file_path=new_name, multi=multi, ask=ask)
-        return new_name
+        if self.WriteFile(text_in=text, file_path=new_name, multi=multi, ask=ask):
+            return new_name
         
     def rplStr(self, in_text):
         
@@ -366,8 +366,9 @@ class DocumentHandler:
         try:
             with open(file_path, 'w', encoding=self.encoding, errors=error, newline='\r\n') as n_file:
                 n_file.write(text_in)
-            if multi is False:
-                self.messageInformation(file_path)
+                if multi is False:
+                    self.messageInformation(file_path)
+                return True
             logger.debug(f"Write: {file_path}: {self.encoding}")
         except (IOError, UnicodeEncodeError, UnicodeDecodeError) as e:
             logger.debug(f"writeFile: Error: {e}")
@@ -497,14 +498,15 @@ class Transliteracija(DocumentHandler):
             self.encoding = "utf-8-sig"
         new_name = self.newName()
         text = self.changeLetters()
-        self.WriteFile(text_in=text, file_path=new_name, multi=True, ask=False)
+        if self.WriteFile(text_in=text, file_path=new_name, multi=True, ask=False):
+            return new_name
     
     def write_transliterated(self, multi=False, ask=True):
         """"""
         new_name = self.newName()
         text = self.changeLetters()
-        self.WriteFile(text_in=text, file_path=new_name, multi=multi, ask=ask)
-        return new_name
+        if self.WriteFile(text_in=text, file_path=new_name, multi=multi, ask=ask):
+            return new_name
         
     def changeLetters(self):
         '''
