@@ -48,10 +48,11 @@ class FileHandler:
         msg.setWindowTitle(f"{basename(dialog_title)}")
         msg.setText("<h3><font color='#55aaff'>UnicodeDecodeError</h3></font>\n")
         msg.setInformativeText(
-            f"Detektovane su neke greške u tekstu,\n"
-            f"ako ima previše grešaka pokušajte drugo\n"
-            f" kodiranje, i opciju ReloadFile\n"
-            f"<h4>{basename(dialog_title)}</h4>\n"
+            f"Detektovano je pogrešno kodiranje u tekstu.\n"
+            f"Pokušaćemo da pronađemo pravi enkodig teksta.\n"
+            f"Ako ipak ima previše grešaka pokušajte drugo\n"
+            f" kodiranje, i opciju ReloadFile.\n\n"
+            f"{basename(dialog_title)}"
         )
         msg.setIcon(QMessageBox.Critical)
         msg.setStandardButtons(QMessageBox.Ok)
@@ -116,9 +117,19 @@ class FileHandler:
                     if content.find(i) < 0:
                         c += 1
                 if c > 0:
-                    enc = "windows-1250"
                     self.ErrorDlg(filepath)
-            return enc    
+                    for real_enc in ["utf-8", "windows-1250"]:
+                        try:
+                            with codecs.open(filepath, "r", encoding=real_enc) as f:
+                                f.readlines()
+                                f.seek(0)
+                        except:
+                            logger.debug(f"Trying encoding {real_enc}")
+                        else:
+                            logger.debug(f"Encoding is {real_enc}")
+                            break
+                    enc = real_enc
+            return enc
     
     def singleFileInput(self):
         '''Handle single file path'''
