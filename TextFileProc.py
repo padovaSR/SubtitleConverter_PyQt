@@ -124,7 +124,7 @@ class FileHandler:
                                 f.readlines()
                                 f.seek(0)
                         except:
-                            logger.debug(f"Trying encoding {real_enc}")
+                            logger.debug(f"Not {enc}! Trying encoding {real_enc}")
                         else:
                             break
                     enc = real_enc
