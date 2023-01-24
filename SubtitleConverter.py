@@ -62,8 +62,18 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.actionOpen_multiple.triggered.connect(self.onOpenMultiple)
         self.actionExport_ZIP.triggered.connect(self.exportZIP)
         self.actionQuit.triggered.connect(self.onQuit)
+        ##======================================================================##
         self.actionFont.triggered.connect(self.fontDialog)
         self.actionBoja_fonta.triggered.connect(self.applyColor)
+        ##======================================================================##
+        self.actionUndo.triggered.connect(self.EditText)
+        self.actionRedo.triggered.connect(self.EditText)
+        self.actionCopy.triggered.connect(self.EditText)
+        self.actionCut.triggered.connect(self.EditText)
+        self.actionPaste.triggered.connect(self.EditText)
+        self.actionDelete.triggered.connect(self.EditText)
+        self.actionFind_Replace.triggered.connect(self.findReplace)
+        self.actionSelectAll.triggered.connect(self.EditText)
         ##======================================================================##
         self.actionColor.triggered.connect(self.formatText)
         self.actionBold.triggered.connect(self.formatText)
@@ -76,8 +86,6 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.actionCYR.triggered.connect(self.LatinToCyrillic)
         self.actionCyrToAnsi.triggered.connect(self.CyrillicToLatin)
         self.actionCyrToUTF8.triggered.connect(self.CyrillicToLatin)
-        ##======================================================================##
-        self.actionFind_Replace.triggered.connect(self.findReplace)
         ##======================================================================##
         self.actionFixer.triggered.connect(self.OnFixerSettings)
         self.comboBox.currentIndexChanged.connect(self.on_combo_box_changed)
@@ -351,7 +359,26 @@ class MainWindow(Ui_MainWindow, QMainWindow):
     def findReplace(self):
         find_replace_dialog = FindReplaceDialog(text_edit=self.text_1)
         find_replace_dialog.exec()
+    
+    def EditText(self):
+        """"""
+        text_action_edit = self.sender().text()
         
+        if text_action_edit == "Undo":
+            self.text_1.undo()
+        elif text_action_edit == "Redo":
+            self.text_1.redo()
+        elif text_action_edit == "Copy":
+            self.text_1.copy()
+        elif text_action_edit == "Paste":
+            self.text_1.paste()
+        elif text_action_edit == "Cut":
+            self.text_1.cut()
+        elif text_action_edit == "Select All":
+            self.text_1.selectAll()
+        elif text_action_edit == "Delete":
+            self.text_1.insertPlainText("")
+            
     def update_recent_menu(self, new_file=None):
         if new_file:
             if new_file in self.recent_files:
