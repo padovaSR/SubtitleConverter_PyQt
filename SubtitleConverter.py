@@ -515,9 +515,13 @@ class MainWindow(Ui_MainWindow, QMainWindow):
     def writeFileHistory(self, hfile_list):
         """"""
         logfile = open(log_file_history, "w", encoding="utf-8", newline="\r\n")
-        for paths in hfile_list:
-            if os.path.exists(paths):
-                logfile.write(normpath(paths) + "\n")
+        log_list = []
+        for path in hfile_list:
+            if os.path.exists(path):
+                if path not in log_list:
+                    log_list.append(path)
+        for file_path in log_list:
+                logfile.write(normpath(file_path) + "\n")
         logfile.close()
         
     def removeTmpFiles(self):
