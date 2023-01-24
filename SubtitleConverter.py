@@ -49,6 +49,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.CYR = False
         self.showMessage = True
         self.new_files = []
+        self.cyr_utf8 = []
         
         self.setFontAndStyle()
         
@@ -259,16 +260,19 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             text = self.text_1.toPlainText()
             handler = DocumentHandler(self.single_file, text, new_encoding, ext, cyr=self.CYR)
             new_file_name = handler.write_new_file()
-            handler.handleErrors(new_file_name)
-            self.update_recent_menu(new_file_name)
+            if new_file_name:
+                handler.handleErrors(new_file_name)
+                self.update_recent_menu(new_file_name)
         else:
+            self.new_files.clear()
             for file_item in MULTI_FILE:
                 text = normalizeText(file_item.enc, file_item.path)
                 handler = DocumentHandler(file_item.realpath, text, new_encoding, ext, cyr=self.CYR)
                 new_file_name = handler.write_new_file(multi=True, ask=False)
-                self.new_files.append(new_file_name)
-                handler.handleErrors(new_file_name)
-                self.setStatus(status1=basename(file_item.path), encoding="")
+                if new_file_name:
+                    self.new_files.append(new_file_name)
+                    handler.handleErrors(new_file_name)
+                    self.setStatus(status1=basename(file_item.path), encoding="")
             self.setStatus("MultiFiles done", encoding=new_encoding)
             self.infoMessage("\n".join([basename(x) for x in self.new_files]))
             
@@ -283,18 +287,25 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             text = self.text_1.toPlainText()
             handler = Transliteracija(self.single_file, text, new_encoding, ext)
             new_file_name = handler.write_transliterated()
-            handler.handleErrors(new_file_name)
-            self.update_recent_menu(new_file_name)
-            handler.write_utf8_file()
+            if new_file_name:
+                handler.handleErrors(new_file_name)
+                self.update_recent_menu(new_file_name)
+            new_utf8_file = handler.write_utf8_file()
+            self.cyr_utf8.append(new_utf8_file)
         else:
+            self.new_files.clear()
+            self.cyr_utf8.clear()
             for file_item in MULTI_FILE:
                 text = normalizeText(file_encoding=file_item.enc, filepath=file_item.path)
                 handler = Transliteracija(file_item.realpath, text, new_encoding, ext)
                 new_file_name = handler.write_transliterated(multi=True, ask=False)
-                handler.handleErrors(new_file_name)
-                self.setStatus(status1=basename(file_item.path), encoding="")
-                self.new_files.append(new_file_name)
-                handler.write_utf8_file(multi=True)
+                if new_file_name:
+                    handler.handleErrors(new_file_name)
+                    self.setStatus(status1=basename(file_item.path), encoding="")
+                    self.new_files.append(new_file_name)
+                new_utf8_file = handler.write_utf8_file(multi=True)
+                if new_utf8_file:
+                    self.cyr_utf8.append(new_utf8_file)
             self.setStatus("MultiFiles done", encoding=new_encoding)
             self.infoMessage("\n".join([basename(x) for x in self.new_files]))
                 
@@ -315,16 +326,19 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             text = self.text_1.toPlainText()
             handler = Transliteracija(self.single_file, text, new_encoding, ext, reversed_action=True)
             new_file_name = handler.write_transliterated()
-            handler.handleErrors(new_file_name)
-            self.update_recent_menu(new_file_name)
+            if new_file_name:
+                handler.handleErrors(new_file_name)
+                self.update_recent_menu(new_file_name)
         else:
+            self.new_files.clear()
             for file_item in MULTI_FILE:
                 text = normalizeText(file_encoding=file_item.enc, filepath=file_item.path)
                 handler = Transliteracija(file_item.realpath, text, new_encoding, ext, reversed_action=True)
                 new_file_name = handler.write_transliterated(multi=True, ask=False)
-                handler.handleErrors(new_file_name)
-                self.new_files.append(new_file_name)
-                self.setStatus(status1=basename(file_item.path), encoding="")
+                if new_file_name:
+                    handler.handleErrors(new_file_name)
+                    self.new_files.append(new_file_name)
+                    self.setStatus(status1=basename(file_item.path), encoding="")
             self.setStatus("MultiFiles done", encoding=new_encoding)
             self.infoMessage("\n".join([basename(x) for x in self.new_files]))
     
