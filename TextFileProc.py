@@ -126,7 +126,6 @@ class FileHandler:
                         except:
                             logger.debug(f"Trying encoding {real_enc}")
                         else:
-                            logger.debug(f"Encoding is {real_enc}")
                             break
                     enc = real_enc
             return enc
