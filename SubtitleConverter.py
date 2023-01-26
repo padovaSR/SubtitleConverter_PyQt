@@ -13,7 +13,7 @@ from zip_confirm import ZipStructure
 from fixer_settings import FixerSettings
 from settings_dialog import MainSettings
 from merger_settings import MergerSettings
-from TextFileProc import FileHandler, DocumentHandler, ErrorsHandler, Transliteracija, normalizeText, codelist
+from TextFileProc import FileHandler, DocumentHandler, ErrorsHandler, Transliteracija, normalizeText
 
 from resources.find_replace import FindReplaceDialog
 from resources.IsCyrillic import checkCyrillicAlphabet
@@ -362,40 +362,31 @@ class MainWindow(Ui_MainWindow, QMainWindow):
     
     def SaveFile(self):
         """"""
-        if self.single_file:
-            FileToSave = self.single_file
+        FileToSave = self.single_file
+        Enc_saved = self.file_enc
+        if not FileToSave:
+            self.SaveAs()
         else:
-            FileToSave = "Untitled.txt"
-        if self.file_enc:
-            Enc_saved = self.file_enc
-        else:
-            Enc_saved = "utf-8"
-        text = self.text_1.toPlainText()
-        writer = DocumentHandler(input_text=text, encoding=Enc_saved)
-        res = writer.WriteFile(text, FileToSave, True, False)
-        self.setStatus(basename(FileToSave), encoding=Enc_saved)
-        if res:
-            self.actionSave.setEnabled(False)        
+            text = self.text_1.toPlainText()
+            writer = DocumentHandler(input_text=text, encoding=Enc_saved)
+            res = writer.WriteFile(text, FileToSave, True, False)
+            self.setStatus(basename(FileToSave), encoding=Enc_saved)
+            if res:
+                self.actionSave.setEnabled(False)        
         
     def SaveAs(self):
         """"""
-        if self.single_file:
-            FileToSave = self.single_file
-        else:
-            FileToSave = "Untitled"
-        if self.file_enc:
-            Enc_saved = self.file_enc
-        else:
-            Enc_saved = "utf-8"
+        FileToSave = self.single_file or "Untitled.txt"
+        Enc_saved = self.file_enc or "utf-8"
         fileName, _ = QFileDialog.getSaveFileName(
             self, str("Save File"), FileToSave, "SubRip (*.srt *.txt);; All files (*.*)"
         )
         if fileName:
             text = self.text_1.toPlainText()
             writer = DocumentHandler(encoding=Enc_saved)
-            res = writer.WriteFile(text, FileToSave, ask=False)
-            self.setStatus(basename(FileToSave), encoding=Enc_saved)
-            self.update_recent_menu(FileToSave)
+            res = writer.WriteFile(text, fileName, ask=False)
+            self.setStatus(basename(fileName), encoding=Enc_saved)
+            self.update_recent_menu(fileName)
             if res:
                 self.actionSave_as.setEnabled(False)
                 
