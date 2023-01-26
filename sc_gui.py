@@ -464,11 +464,13 @@ class Ui_MainWindow(object):
         self.actionSave.setText(u"Save")
         self.actionSave.setStatusTip(u"Save")
         self.actionSave.setShortcut(u"Ctrl+S")
+        self.actionSave.setEnabled(False)
         
         self.menuFile.addAction(self.actionSave_as)
         self.actionSave_as.setText(u"Save as")
         self.actionSave_as.setStatusTip(u"Save as")
         self.actionSave_as.setShortcut(u"Ctrl+Shift+S")
+        self.actionSave_as.setEnabled(False)
         
         self.menuFile.addAction(self.actionExport_ZIP)
         self.actionExport_ZIP.setText(u"Export ZIP")
@@ -477,7 +479,7 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionClose)
         self.actionClose.setText(u"Close")
         self.actionClose.setStatusTip(u"Close")
-        self.actionClose.setShortcut(u"Ctrl+X")
+        self.actionClose.setShortcut(u"Ctrl+W")
         
         self.actionQuit.setText(u"Quit")
         self.actionQuit.setStatusTip(u"Exit program")
@@ -604,7 +606,7 @@ class Ui_MainWindow(object):
         self.menuZoom.addAction(self.actionZoom_out)
         
         self.menuFormat.addAction(self.actionItalic)
-        self.actionItalic.setStatusTip(u"Selektovani teks")
+        self.actionItalic.setStatusTip(u"Selektovani tekst")
         self.actionItalic.setText(u"Italic")        
         self.menuFormat.addAction(self.actionBold)
         self.actionBold.setText(u"Bold")
