@@ -117,7 +117,8 @@ class FileHandler:
                     if content.find(i) < 0:
                         c += 1
                 if c > 0:
-                    self.ErrorDlg(filepath)
+                    if MAIN_SETTINGS["CB_value"].strip() == "auto":
+                        self.ErrorDlg(filepath)
                     for real_enc in ["utf-8", "windows-1250"]:
                         try:
                             with codecs.open(filepath, "r", encoding=real_enc) as f:
@@ -354,10 +355,10 @@ class DocumentHandler:
             if count_s >= 2:
                 name1 = "".join(name1.rsplit(i, count_s))
                 if not name1.endswith(i):
-                    name1 = name1 + i
+                    name1 += i
         if self.cyr is True:
-            pre_ext = splitext(name1)[1].strip(".")
-            name1 = name1.replace(pre_ext, f"cyr_{pre_ext}")
+            bname, pre_ext = splitext(name1)
+            name1 = f"{bname}.cyr_{pre_ext.strip('.')}"
         return normpath(join(dirname(file_path), f"{name1}{fsuffix}"))   ## Full path
             
     def WriteFile(self, text_in, file_path, multi=False, ask=True):
