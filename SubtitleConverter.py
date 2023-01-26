@@ -2,7 +2,7 @@
 
 
 from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, QDialog, QFontDialog, QColorDialog, QMessageBox, QAction
-from PySide2.QtGui import QFont, QTextCharFormat, QColor, QTextCursor
+from PySide2.QtGui import QFont, QTextCursor
 from PySide2.QtCore import Qt, QFileInfo, QDir, QEventLoop, QTimer
 
 from sc_gui import Ui_MainWindow
@@ -13,7 +13,7 @@ from zip_confirm import ZipStructure
 from fixer_settings import FixerSettings
 from settings_dialog import MainSettings
 from merger_settings import MergerSettings
-from TextFileProc import FileHandler, DocumentHandler, ErrorsHandler, Transliteracija, normalizeText
+from TextFileProc import FileHandler, DocumentHandler, ErrorsHandler, Transliteracija, normalizeText, codelist
 
 from resources.find_replace import FindReplaceDialog
 from resources.IsCyrillic import checkCyrillicAlphabet
@@ -26,7 +26,7 @@ import shutil
 import linecache
 import re
 import os
-from os.path import join, basename, normpath, exists
+from os.path import join, basename, normpath, exists, splitext
 from collections import deque
 from functools import partial
 
@@ -60,6 +60,8 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         
         self.actionOpen.triggered.connect(self.onOpen)
         self.actionOpen_multiple.triggered.connect(self.onOpenMultiple)
+        self.actionSave.triggered.connect(self.SaveFile)
+        self.actionSave_as.triggered.connect(self.SaveAs)
         self.actionExport_ZIP.triggered.connect(self.exportZIP)
         self.actionQuit.triggered.connect(self.onQuit)
         ##======================================================================##
@@ -99,7 +101,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.actionZoom_in.triggered.connect(self.text_1.zoomIn)
         self.actionZoom_out.triggered.connect(self.text_1.zoomOut)
         
-        
+        self.text_1.document().contentsChanged.connect(self.documentWasModified)
         self.closeEvent = self.on_close_event
         
         MAIN_SETTINGS["CB_value"] = self.comboBox.currentText()
@@ -205,6 +207,8 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                 while not self.text_1.viewport().isVisible():
                     QApplication.processEvents()                
                 self.highlight_errors(text)
+                self.actionSave.setEnabled(False)
+                self.actionSave_as.setEnabled(False)
             if len(MULTI_FILE) > 1:
                 self.displayFiles(MULTI_FILE)
                 self.status_2.clear()
@@ -247,7 +251,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         if action == "To ANSI":
             new_encoding = "windows-1250"
             ext = MAIN_SETTINGS["key5"]["lat_ansi_srt"]
-            if self.CYR is  True:
+            if self.CYR is True:
                 if self.showMessage is True:
                     msg = ErrorDialog()
                     msg.exec()
@@ -354,7 +358,50 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         msg.setInformativeText(message)
         msg.setIcon(QMessageBox.Information)
         msg.setStandardButtons(QMessageBox.Ok)
-        msg.exec_()        
+        msg.exec_()
+    
+    def SaveFile(self):
+        """"""
+        if self.single_file:
+            FileToSave = self.single_file
+        else:
+            FileToSave = "Untitled.txt"
+        if self.file_enc:
+            Enc_saved = self.file_enc
+        else:
+            Enc_saved = "utf-8"
+        text = self.text_1.toPlainText()
+        writer = DocumentHandler(input_text=text, encoding=Enc_saved)
+        res = writer.WriteFile(text, FileToSave, True, False)
+        self.setStatus(basename(FileToSave), encoding=Enc_saved)
+        if res:
+            self.actionSave.setEnabled(False)        
+        
+    def SaveAs(self):
+        """"""
+        if self.single_file:
+            FileToSave = self.single_file
+        else:
+            FileToSave = "Untitled"
+        if self.file_enc:
+            Enc_saved = self.file_enc
+        else:
+            Enc_saved = "utf-8"
+        fileName, _ = QFileDialog.getSaveFileName(
+            self, str("Save File"), FileToSave, "SubRip (*.srt *.txt);; All files (*.*)"
+        )
+        if fileName:
+            text = self.text_1.toPlainText()
+            writer = DocumentHandler(encoding=Enc_saved)
+            res = writer.WriteFile(text, FileToSave, ask=False)
+            self.setStatus(basename(FileToSave), encoding=Enc_saved)
+            self.update_recent_menu(FileToSave)
+            if res:
+                self.actionSave_as.setEnabled(False)
+                
+    def documentWasModified(self):
+        self.actionSave.setEnabled(True)
+        self.actionSave_as.setEnabled(True)
     
     def findReplace(self):
         find_replace_dialog = FindReplaceDialog(text_edit=self.text_1)
