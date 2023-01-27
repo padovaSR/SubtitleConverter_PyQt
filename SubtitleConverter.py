@@ -62,6 +62,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.actionOpen_multiple.triggered.connect(self.onOpenMultiple)
         self.actionSave.triggered.connect(self.SaveFile)
         self.actionSave_as.triggered.connect(self.SaveAs)
+        self.actionReload_file.triggered.connect(self.ReloadFile)
         self.actionExport_ZIP.triggered.connect(self.exportZIP)
         self.actionQuit.triggered.connect(self.onQuit)
         ##======================================================================##
@@ -185,7 +186,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             self.OpenFiles(filenames)
     
     def OpenFiles(self, file_paths):
-        if not type(file_paths) is  list:
+        if not type(file_paths) is list:
             file_paths = [file_paths]
         handler = FileHandler(input_files=file_paths)
         self.CYR = False
@@ -271,7 +272,8 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             new_file_name = handler.write_new_file()
             if new_file_name:
                 handler.handleErrors(new_file_name)
-                self.update_recent_menu(new_file_name)
+                self.OpenFiles(new_file_name)
+                self.actionReload_file.setEnabled(True)
         else:
             self.new_files.clear()
             for file_item in MULTI_FILE:
@@ -298,7 +300,8 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             new_file_name = handler.write_transliterated()
             if new_file_name:
                 handler.handleErrors(new_file_name)
-                self.update_recent_menu(new_file_name)
+                self.OpenFiles(new_file_name)
+                self.actionReload_file.setEnabled(True)
             new_utf8_file = handler.write_utf8_file()
             self.cyr_utf8.append(new_utf8_file)
         else:
@@ -337,7 +340,8 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             new_file_name = handler.write_transliterated()
             if new_file_name:
                 handler.handleErrors(new_file_name)
-                self.update_recent_menu(new_file_name)
+                self.OpenFiles(new_file_name)
+                self.actionReload_file.setEnabled(True)
         else:
             self.new_files.clear()
             for file_item in MULTI_FILE:
@@ -393,7 +397,14 @@ class MainWindow(Ui_MainWindow, QMainWindow):
     def documentWasModified(self):
         self.actionSave.setEnabled(True)
         self.actionSave_as.setEnabled(True)
-    
+        self.actionUndo.setEnabled(True)
+        
+    def ReloadFile(self):
+        """"""
+        PreviousFile = self.recent_files[1]
+        self.OpenFiles(PreviousFile)
+        self.actionReload_file.setEnabled(False)
+        
     def findReplace(self):
         find_replace_dialog = FindReplaceDialog(text_edit=self.text_1)
         find_replace_dialog.exec()
@@ -403,9 +414,16 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         text_action_edit = self.sender().text()
         
         if text_action_edit == "Undo":
-            self.text_1.undo()
+            if not self.text_1.document().isUndoAvailable():
+                self.actionUndo.setEnabled(False)
+            else:
+                self.text_1.undo()
+                self.actionRedo.setEnabled(True)
         elif text_action_edit == "Redo":
-            self.text_1.redo()
+            if not self.text_1.document().isRedoAvailable():
+                self.actionRedo.setEnabled(False)
+            else:
+                self.text_1.redo()
         elif text_action_edit == "Copy":
             self.text_1.copy()
         elif text_action_edit == "Paste":
