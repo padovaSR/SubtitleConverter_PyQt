@@ -61,12 +61,10 @@ def preSuffix():
 
 # key1=fixer, key2=merger, key3=PATHs, key4=font_data, key5=files_settings
 
-conf_file = os.path.join("resources", "shortcut_keys.cfg")
+conf_file = os.path.join("resources", "var", "shortcut_keys.cfg")
 
-_shortcutsKey = Dictionaries().dict_fromFile(conf_file, "=")
-
-shortcutsKey = defaultdict(str)
-shortcutsKey.update(_shortcutsKey)
+shortcutsKeys = defaultdict(str)
+shortcutsKeys.update(Dictionaries().dict_fromFile(conf_file, "="))
 
 MAIN_SETTINGS=defaultdict(str)
 
