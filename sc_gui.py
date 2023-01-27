@@ -9,7 +9,7 @@ from PySide2.QtWidgets import (QPlainTextEdit, QMenuBar, QMenu, QToolBar, QHBoxL
 from PySide2.QtCore import QSize, QRect
 from PySide2.QtGui import QIcon, QFont, Qt, QWheelEvent
 from os.path import join 
-from settings import I_PATH, MAIN_SETTINGS 
+from settings import I_PATH, MAIN_SETTINGS, shortcutsKeys
 
 
 class MyPlainTextEdit(QPlainTextEdit):
@@ -124,6 +124,7 @@ class Ui_MainWindow(object):
         icon8.addFile(join(I_PATH,"cyrillic.png"), QSize(), QIcon.Normal, QIcon.Off)
         self.actionCYR.setIcon(icon8)
         self.actionCYR.setFont(font)
+        self.actionCYR.setShortcut(shortcutsKeys["ToCyrillic"])
         
         self.actionANSI = QAction(MainWindow)
         self.actionANSI.setObjectName(u"actionANSI")
@@ -131,6 +132,7 @@ class Ui_MainWindow(object):
         icon9.addFile(join(I_PATH,"filenew.png"), QSize(), QIcon.Normal, QIcon.Off)
         self.actionANSI.setIcon(icon9)
         self.actionANSI.setFont(font)
+        self.actionANSI.setShortcut(shortcutsKeys["ToANSI"])
         
         self.actionUTF_8 = QAction(MainWindow)
         self.actionUTF_8.setObjectName(u"actionUTF_8")
@@ -138,6 +140,7 @@ class Ui_MainWindow(object):
         icon9a.addFile(join(I_PATH,"filenew_1.png"), QSize(), QIcon.Normal, QIcon.Off)        
         self.actionUTF_8.setIcon(icon9a)
         self.actionUTF_8.setFont(font)
+        self.actionUTF_8.setShortcut(shortcutsKeys["ToUTF"])
         
         self.actionCyrToAnsi = QAction(MainWindow)
         self.actionCyrToAnsi.setObjectName(u"actionCyrToAnsi")
@@ -145,11 +148,13 @@ class Ui_MainWindow(object):
         icon10.addFile(join(I_PATH,"text.png"), QSize(), QIcon.Normal, QIcon.Off)
         self.actionCyrToAnsi.setIcon(icon10)
         self.actionCyrToAnsi.setFont(font)
+        self.actionCyrToAnsi.setShortcut(shortcutsKeys["Cyr to latin ansi"])
         
         self.actionCyrToUTF8 = QAction(MainWindow)
         self.actionCyrToUTF8.setObjectName(u"actionCyrToUTF8")
         self.actionCyrToUTF8.setIcon(icon10)
         self.actionCyrToUTF8.setFont(font)
+        self.actionCyrToUTF8.setShortcut(shortcutsKeys["Cyr to latin utf8"])
         
         self.actionSpecReplace = QAction(MainWindow)
         self.actionSpecReplace.setObjectName(u"actionSpecReplace")
@@ -157,18 +162,21 @@ class Ui_MainWindow(object):
         icon11.addFile(join(I_PATH,"edit-replace.png"), QSize(), QIcon.Normal, QIcon.Off)
         self.actionSpecReplace.setIcon(icon11)
         self.actionSpecReplace.setFont(font)
+        self.actionSpecReplace.setShortcut(shortcutsKeys["SpecReplace"])
         
         self.actionTranscribe = QAction(MainWindow)
         self.actionTranscribe.setObjectName(u"actionTranscribe")
         icon12 = QIcon()
         icon12.addFile(join(I_PATH,"cyr-ltr.24.png"), QSize(), QIcon.Normal, QIcon.Off)
         self.actionTranscribe.setIcon(icon12)
+        self.actionTranscribe.setShortcut(shortcutsKeys["Transcribe"])
         
         self.actionCleanup = QAction(MainWindow)
         self.actionCleanup.setObjectName(u"actionCleanup")
         icon13 = QIcon()
         icon13.addFile(join(I_PATH,"editclear.png"), QSize(), QIcon.Normal, QIcon.Off)
         self.actionCleanup.setIcon(icon13)
+        self.actionCleanup.setShortcut(shortcutsKeys["Cleanup"])
         
         self.actionAbot = QAction(MainWindow)
         self.actionAbot.setObjectName(u"actionAbot")
@@ -265,7 +273,7 @@ class Ui_MainWindow(object):
         self.utf8_bom.setStatusTip("Čekiraj za default UTF8_BOM")
         self.utf8_bom.setFont(font)
         self.utf8_bom.setCheckable(True)
-        self.utf8_bom.setShortcut("")
+        self.utf8_bom.setShortcut(shortcutsKeys["bom_utf8"])
         
         self.utf8_txt = QAction(MainWindow)
         self.utf8_txt.setObjectName("utf8_txt")
@@ -273,7 +281,7 @@ class Ui_MainWindow(object):
         self.utf8_txt.setStatusTip("Čekiraj za default ekstenziju")
         self.utf8_txt.setFont(font)
         self.utf8_txt.setCheckable(True)
-        self.utf8_txt.setShortcut("")
+        self.utf8_txt.setShortcut(shortcutsKeys["txt_utf8"])
         
         self.actionSettings_main = QAction(MainWindow)
         self.actionSettings_main.setObjectName(u"actionSettings_main")
@@ -281,6 +289,7 @@ class Ui_MainWindow(object):
         icon26.addFile(join(I_PATH,"preferences.png"), QSize(), QIcon.Normal, QIcon.Off)
         self.actionSettings_main.setIcon(icon26)
         self.actionSettings_main.setFont(font)
+        self.actionSettings_main.setShortcut(shortcutsKeys["MainSettings"])
         
         self.actionMerger_settings = QAction(MainWindow)
         self.actionMerger_settings.setObjectName(u"actionMerger_settings")
@@ -288,6 +297,7 @@ class Ui_MainWindow(object):
         icon27.addFile(join(I_PATH,"document-properties.png"), QSize(), QIcon.Normal, QIcon.Off)
         self.actionMerger_settings.setIcon(icon27)
         self.actionMerger_settings.setFont(font)
+        self.actionMerger.setShortcut(shortcutsKeys["Merger"])
         
         # Create the Recently Opened submenu
         self.recent_menu = QMenu("Recent files")
@@ -300,6 +310,7 @@ class Ui_MainWindow(object):
         icon28.addFile(join(I_PATH,"font-type-24.png"), QSize(), QIcon.Normal, QIcon.Off)
         self.actionFont.setIcon(icon28)
         self.actionFont.setFont(font)
+        self.actionFont.setShortcut(shortcutsKeys["Font"])
         
         self.actionBoja_fonta = QAction(MainWindow)
         self.actionBoja_fonta.setObjectName(u"actionBoja_fonta")
@@ -307,6 +318,7 @@ class Ui_MainWindow(object):
         icon29.addFile(join(I_PATH,"app-graphics.png"), QSize(), QIcon.Normal, QIcon.Off)
         self.actionBoja_fonta.setIcon(icon29)
         self.actionBoja_fonta.setFont(font)
+        self.actionBoja_fonta.setShortcut(shortcutsKeys["BojaFonta"])
         
         self.actionItalic = QAction(MainWindow)
         self.actionItalic.setObjectName(u"actionItalic")
@@ -314,6 +326,7 @@ class Ui_MainWindow(object):
         icon30.addFile(join(I_PATH,"text-italic.png"), QSize(), QIcon.Normal, QIcon.Off)
         self.actionItalic.setIcon(icon30)
         self.actionItalic.setFont(font)
+        self.actionItalic.setShortcut(shortcutsKeys["Italic"])
         
         self.actionBold = QAction(MainWindow)
         self.actionBold.setObjectName(u"actionBold")
@@ -321,6 +334,7 @@ class Ui_MainWindow(object):
         icon31.addFile(join(I_PATH,"text-bold.png"), QSize(), QIcon.Normal, QIcon.Off)
         self.actionBold.setIcon(icon31)
         self.actionBold.setFont(font)
+        self.actionBold.setShortcut(shortcutsKeys["Bold"])
         
         self.actionUnderline = QAction(MainWindow)
         self.actionUnderline.setObjectName(u"actionUnderline")
@@ -328,11 +342,13 @@ class Ui_MainWindow(object):
         icon32.addFile(join(I_PATH,"text-underline.png"), QSize(), QIcon.Normal, QIcon.Off)
         self.actionUnderline.setIcon(icon32)
         self.actionUnderline.setFont(font)
+        self.actionUnderline.setShortcut(shortcutsKeys["Underline"])
         
         self.actionColor = QAction(MainWindow)
         self.actionColor.setObjectName(u"actionColor")
         self.actionColor.setIcon(icon29)
         self.actionColor.setFont(font)
+        self.actionColor.setShortcut(shortcutsKeys["Color"])
         
         self.actionAll_caps = QAction(MainWindow)
         self.actionAll_caps.setObjectName(u"actionAll_caps")
@@ -340,9 +356,9 @@ class Ui_MainWindow(object):
         icon33.addFile(join(I_PATH,"uppercase-16.png"), QSize(), QIcon.Normal, QIcon.Off)
         self.actionAll_caps.setIcon(icon33)
         self.actionAll_caps.setFont(font)
+        self.actionAll_caps.setShortcut(shortcutsKeys["AllCaps"])
         
         self.actionExport_ZIP = QAction(MainWindow)
-        self.actionExport_ZIP.setObjectName(u"actionExport_ZIP")
         icon34 = QIcon()
         icon34.addFile(join(I_PATH,"zip_file.png"), QSize(), QIcon.Normal, QIcon.Off)
         self.actionExport_ZIP.setIcon(icon34)
@@ -447,43 +463,46 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionOpen)
         self.actionOpen.setText(u"Open")
         self.actionOpen.setStatusTip(u"Open")
-        self.actionOpen.setShortcut(u"Ctrl+O")
+        self.actionOpen.setShortcut(shortcutsKeys["Open"])
         
         self.menuFile.addAction(self.actionOpen_multiple)
         self.actionOpen_multiple.setText(u"Open multiple")
         self.actionOpen_multiple.setStatusTip(u"Open multiple")
-        self.actionOpen_multiple.setShortcut(u"Ctrl+Shift+O")        
+        self.actionOpen_multiple.setShortcut(shortcutsKeys["OpenMultiple"])        
         
         self.menuFile.addAction(self.actionReload_file)
         self.actionReload_file.setText(u"Reload file")
-        self.actionReload_file.setStatusTip(u"Reload file")
-        self.actionReload_file.setShortcut(u"Ctrl+Shift+R")        
+        self.actionReload_file.setStatusTip(u"Reload previous file")
+        self.actionReload_file.setToolTip("Reload previous file")
+        self.actionReload_file.setShortcut(shortcutsKeys["Reload file"])
+        self.actionReload_file.setEnabled(False)
         self.menuFile.addSeparator()
         
         self.menuFile.addAction(self.actionSave)
         self.actionSave.setText(u"Save")
         self.actionSave.setStatusTip(u"Save")
-        self.actionSave.setShortcut(u"Ctrl+S")
+        self.actionSave.setShortcut(shortcutsKeys["Save"])
         self.actionSave.setEnabled(False)
         
         self.menuFile.addAction(self.actionSave_as)
         self.actionSave_as.setText(u"Save as")
         self.actionSave_as.setStatusTip(u"Save as")
-        self.actionSave_as.setShortcut(u"Ctrl+Shift+S")
+        self.actionSave_as.setShortcut(shortcutsKeys["Save as"])
         self.actionSave_as.setEnabled(False)
         
         self.menuFile.addAction(self.actionExport_ZIP)
         self.actionExport_ZIP.setText(u"Export ZIP")
+        self.actionExport_ZIP.setShortcut(shortcutsKeys["Export_ZIP"])
         self.menuFile.addSeparator()
         
         self.menuFile.addAction(self.actionClose)
         self.actionClose.setText(u"Close")
         self.actionClose.setStatusTip(u"Close")
-        self.actionClose.setShortcut(u"Ctrl+W")
+        self.actionClose.setShortcut(shortcutsKeys["Close"])
         
         self.actionQuit.setText(u"Quit")
         self.actionQuit.setStatusTip(u"Exit program")
-        self.actionQuit.setShortcut(u"Ctrl+Q")        
+        self.actionQuit.setShortcut(shortcutsKeys["Quit"])        
         self.menuFile.addSeparator()
         
         self.menuFile.addMenu(self.recent_menu)
@@ -493,30 +512,32 @@ class Ui_MainWindow(object):
         
         self.menuEdit.addAction(self.actionUndo)
         self.actionUndo.setText(u"Undo")
-        self.actionUndo.setShortcut("Ctrl+Z")
+        self.actionUndo.setShortcut(shortcutsKeys["Undo"])
+        self.actionUndo.setEnabled(False)
         self.menuEdit.addAction(self.actionRedo)
         self.actionRedo.setText(u"Redo")
-        self.actionRedo.setShortcut("Ctrl+Shift+Z")
+        self.actionRedo.setShortcut(shortcutsKeys["Redo"])
+        self.actionRedo.setEnabled(False)
         self.menuEdit.addAction(self.actionCopy)
         self.actionCopy.setText(u"Copy")
-        self.actionCopy.setShortcut("Ctrl+C")
+        self.actionCopy.setShortcut(shortcutsKeys["Copy"])
         self.menuEdit.addAction(self.actionCut)
         self.actionCut.setText(u"Cut")
-        self.actionCut.setShortcut("Ctrl+X")
+        self.actionCut.setShortcut(shortcutsKeys["Cut"])
         self.menuEdit.addAction(self.actionPaste)
         self.actionPaste.setText(u"Paste")
-        self.actionPaste.setShortcut("Ctrl+V")
+        self.actionPaste.setShortcut(shortcutsKeys["Paste"])
         self.menuEdit.addAction(self.actionDelete)
         self.actionDelete.setText(u"Delete")
-        self.actionDelete.setShortcut("Del")
+        self.actionDelete.setShortcut(shortcutsKeys["Delete"])
         self.menuEdit.addSeparator()
         self.menuEdit.addAction(self.actionFind_Replace)
         self.actionFind_Replace.setText(u"Find&Replace")
-        self.actionFind_Replace.setShortcut("Ctrl+H")
+        self.actionFind_Replace.setShortcut(shortcutsKeys["FindReplace"])
         self.menuEdit.addSeparator()
         self.menuEdit.addAction(self.actionSelectAll)
         self.actionSelectAll.setText("Select All")
-        self.actionSelectAll.setShortcut("Ctrl+A")
+        self.actionSelectAll.setShortcut(shortcutsKeys["SelectAll"])
         
         self.menuActions.addAction(self.actionCYR)
         self.actionCYR.setText(u"To Cyr")
@@ -554,12 +575,14 @@ class Ui_MainWindow(object):
         
         self.menuActions.addAction(self.actionChange_manualy)
         self.actionChange_manualy.setText(u"Change manualy")
-        self.actionChange_manualy.setStatusTip(u"Manualno")        
+        self.actionChange_manualy.setStatusTip(u"Manualno")
+        self.actionChange_manualy.setShortcut(shortcutsKeys["ChangeManualy"])
         self.menuActions.addSeparator()
         
         self.menuActions.addAction(self.actionFixer)
         self.actionFixer.setText(u"Fixer")
-        self.actionFixer.setStatusTip(u"Fix subtitle")        
+        self.actionFixer.setStatusTip(u"Fix subtitle")
+        self.actionFixer.setShortcut(shortcutsKeys["FixSubtitle"])
         self.menuActions.addSeparator()
         
         self.menuActions.addAction(self.actionMerger)
@@ -583,8 +606,10 @@ class Ui_MainWindow(object):
         self.menuHelp.addAction(self.actionAbot)
         self.actionAbot.setText(u"About")
         self.actionAbot.setStatusTip(u"About program")
+        self.actionAbot.setShortcut(shortcutsKeys["About"])
         self.menuHelp.addAction(self.actionManual)
         self.actionManual.setText(u"Manual")
+        self.actionManual.setShortcut(shortcutsKeys["Manual"])
         self.actionManual.setStatusTip(u"Manual")
         
         self.menuView.addAction(self.menuZoom.menuAction())
@@ -618,6 +643,7 @@ class Ui_MainWindow(object):
         self.actionAll_caps.setText(u"All caps")
         
         self.toolBar.addAction(self.actionOpen)
+        self.toolBar.addAction(self.actionReload_file)
         self.toolBar.addAction(self.actionSave)
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionCYR)
