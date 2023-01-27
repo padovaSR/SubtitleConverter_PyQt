@@ -102,7 +102,7 @@ class FileHandler:
                         fh.readlines()
                         fh.seek(0)
                 except:
-                    if  MAIN_SETTINGS["CB_value"].strip() == "auto":
+                    if MAIN_SETTINGS["CB_value"].strip() == "auto":
                         pass
                     else:
                         self.ErrorDlg(filepath)
@@ -263,7 +263,7 @@ class DocumentHandler:
                 .replace(b'\xc5\xb8\xc5\x92', b'')
                 .replace(b"\xc2\x81", b"")
                 .replace(b"\xc2\x90", b"")
-                .replace(b"\xef\xbf\xbd", b"") # � utf8 surrogate            
+                .replace(b"\xef\xbf\xbd", b"") # � utf8 surrogate          
             )
             # .replace(b'\x9e', b'\xc5\xbe') \xe2\x96\xa0 = ■
             return mp.decode(encoding="utf-8", errors="surrogatepass")
@@ -421,7 +421,7 @@ class ErrorsHandler:
             for match in re.finditer(MOJIBAKE_SYMBOL_RE, text):
                 surrogates_start.append(match.start())
                 surrogates_ends.append(match.end())
-            return surrogates_start,surrogates_ends    
+            return surrogates_start,surrogates_ends  
         except Exception as e:
             logger.debug("CheckErrors ({0}):".format(e))
         
@@ -617,7 +617,7 @@ class Transliteracija(DocumentHandler):
         for k, v in fdok.items():
             text_in = text_in.replace(k, v)
     
-        return text_in    
+        return text_in  
         
 def normalizeText(file_encoding, filepath):
     """"""
