@@ -3,6 +3,7 @@
 import sys
 import os
 from os.path import join
+
 sys.path.append('../dictionaries')
 
 
@@ -39,7 +40,6 @@ class Dictionaries:
         self.dict0_n2 = self.new_dict2(self.fDict0)
 
         self.pre_cyr = self.dict_fromFile(self.prelatCyr, '=')
-        
         
     def create_dict_other(self, infile):
         with open(infile, 'r', encoding='utf-8') as rplS_fyle:
