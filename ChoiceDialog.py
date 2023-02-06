@@ -59,6 +59,7 @@ class Ui_Dialog(object):
         self.checkBox_3 = QCheckBox(Dialog)
         self.checkBox_3.setObjectName(u"checkBox_3")
         self.checkBox_3.setText(u".txt")
+        self.checkBox_3.setChecked(True)
         self.horizontalLayout.addWidget(self.checkBox_3)
 
         self.checkBox_4 = QCheckBox(Dialog)
@@ -130,13 +131,22 @@ class MultiChoiceDialog(Ui_Dialog, QDialog):
         self.populateList(extensions)
     
     def GetSelections(self):
-        choices = [
-            self.model.item(i).text()
+        selections = [
+            i
             for i in range(self.model.rowCount())
             if self.model.item(i).checkState() is Qt.Checked
         ]
         self.accept()
-        return choices    
+        return selections
+
+    #def GetSelections(self):
+        #choices = [
+            #self.model.item(i).text()
+            #for i in range(self.model.rowCount())
+            #if self.model.item(i).checkState() is Qt.Checked
+        #]
+        #self.accept()
+        #return choices    
     
     def onCheckBox(self):
         state = self.checkBox.checkState()
