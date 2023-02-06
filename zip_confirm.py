@@ -15,9 +15,12 @@ from settings import MAIN_SETTINGS, I_PATH
 
 import sys
 import os
-from os.path import dirname, abspath, join
+from os.path import dirname, abspath, join, expanduser, normpath
 
 root = dirname(dirname(abspath(__file__)))
+
+import logging.config
+logger = logging.getLogger(__name__)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -87,7 +90,7 @@ class Ui_Dialog(object):
 
         self.rButtonCyrANSI = QRadioButton(Dialog)
         self.rButtonCyrANSI.setObjectName(u"rButtonCyrANSI")
-        self.rButtonCyrANSI.setText(u"Ćir-ANSI")
+        self.rButtonCyrANSI.setText(MAIN_SETTINGS["key5"]["Cyr-ansi"])
         self.rButtonCyrANSI.setCheckable(True)
         self.rButtonCyrANSI.setChecked(True)
         self.rButtonCyrANSI.setAutoExclusive(False)
@@ -96,7 +99,7 @@ class Ui_Dialog(object):
 
         self.rButtonCyrUTF8 = QRadioButton(Dialog)
         self.rButtonCyrUTF8.setObjectName(u"rButtonCyrUTF8")
-        self.rButtonCyrUTF8.setText(u"Ćir-UTF8")
+        self.rButtonCyrUTF8.setText(MAIN_SETTINGS["key5"]["Cyr-utf8"])
         self.rButtonCyrUTF8.setCheckable(True)
         self.rButtonCyrUTF8.setChecked(True)
         self.rButtonCyrUTF8.setAutoExclusive(False)
@@ -105,7 +108,7 @@ class Ui_Dialog(object):
 
         self.rButtonLatANSI = QRadioButton(Dialog)
         self.rButtonLatANSI.setObjectName(u"rButtonLatANSI")
-        self.rButtonLatANSI.setText(u"Lat-ANSI")
+        self.rButtonLatANSI.setText(MAIN_SETTINGS["key5"]["Lat-ansi"])
         self.rButtonLatANSI.setCheckable(True)
         self.rButtonLatANSI.setChecked(True)
         self.rButtonLatANSI.setAutoExclusive(False)
@@ -114,7 +117,7 @@ class Ui_Dialog(object):
 
         self.rButtonLatUTF8 = QRadioButton(Dialog)
         self.rButtonLatUTF8.setObjectName(u"rButtonLatUTF8")
-        self.rButtonLatUTF8.setText(u"Lat-UTF8")
+        self.rButtonLatUTF8.setText(MAIN_SETTINGS["key5"]["Lat-utf8"])
         self.rButtonLatUTF8.setCheckable(True)
         self.rButtonLatUTF8.setChecked(True)
         self.rButtonLatUTF8.setAutoExclusive(False)
@@ -160,6 +163,7 @@ class Ui_Dialog(object):
     # setupUi
 
 class ZipStructure(Ui_Dialog, QDialog):
+    new_name = r""
     def __init__(self, file_paths=[], file_name=None, parent=None):
         super(ZipStructure, self).__init__(parent)
         self.setupUi(self)
@@ -167,18 +171,20 @@ class ZipStructure(Ui_Dialog, QDialog):
         self.file_name = file_name
         
         self.buttonBox.rejected.connect(self.onRejected)
-        self.buttonBox.accepted.connect(lambda:self.getData())
-        self.rButtonCyrANSI.clicked.connect(lambda:self.populateTreeView())
-        self.rButtonCyrUTF8.clicked.connect(lambda:self.populateTreeView())
-        self.rButtonLatANSI.clicked.connect(lambda:self.populateTreeView())
-        self.rButtonLatUTF8.clicked.connect(lambda:self.populateTreeView())
-        self.checkBox.clicked.connect(lambda:self.rebuildTreeView())
-        self.pushButton.clicked.connect(lambda:self.getZipFilePath())
+        self.buttonBox.accepted.connect(self.getSelectionIndex)
+        self.rButtonCyrANSI.clicked.connect(self.populateTreeView)
+        self.rButtonCyrUTF8.clicked.connect(self.populateTreeView)
+        self.rButtonLatANSI.clicked.connect(self.populateTreeView)
+        self.rButtonLatUTF8.clicked.connect(self.populateTreeView)
+        self.checkBox.clicked.connect(self.rebuildTreeView)
+        self.pushButton.clicked.connect(self.getZipFilePath)
         self.finished.connect(self.writeSettings)
         
         self.setAcceptDrops(True)
-        
+        self.lineEdit.setText(normpath(join(expanduser("~/Desktop"), self.file_name)))
         self.populateTreeView()
+        
+        self.show_all = self.checkBox.isChecked()
         
     def dragEnterEvent(self, event):
         # Check if the dragged data is a file or a list of files
@@ -214,139 +220,85 @@ class ZipStructure(Ui_Dialog, QDialog):
         if os.path.isdir(file_path):
             file_path = abspath(join(file_path, name))
         self.lineEdit.setText(file_path)
+        self.new_name = file_path
+        self.rebuildTreeView()
         
-    def GetSelections(self):
+    def GetFolders(self):
         buttons = [
             self.rButtonCyrANSI,
             self.rButtonCyrUTF8,
             self.rButtonLatANSI,
             self.rButtonLatUTF8,
         ]
-        return [button.text() for button in buttons if button.isChecked()]
+        folder_names = [button.text() for button in buttons if button.isChecked()]
+        selected_file_paths = []
+        for folder_name in folder_names:
+            folder_index = [button.text() for button in buttons].index(folder_name)
+            selected_file_paths.append(self.file_paths[folder_index])
+        return folder_names, selected_file_paths
     
-
     def rebuildTreeView(self):
         self.populateTreeView(depth=1)
 
     def populateTreeView(self, depth=0):
 
-        # Create the root item
-        root_item = QStandardItem(self.file_name)
+        root_item = QStandardItem(self.lineEdit.text())
         root_item.setIcon(QIcon(join(I_PATH, 'x-zip.png')))
         # Set the root item of the model
         self.model.setItem(0, 0, root_item)
-
         # Create the folder items
-        folder_names = self.GetSelections()
-
+        folders, files = self.GetFolders()
+        folder_names = folders
         folder_items = []
         for folder_name in folder_names:
             folder_item = QStandardItem(folder_name)
             folder_item.setIcon(QIcon(join(I_PATH, "Folder-24.png")))
             folder_items.append(folder_item)
-
+    
         # Add the folder items to the root item
-        for folder_item in folder_items:
-            root_item.appendRow(folder_item)
-
-        f_file_names = {
-            'Ćir-ANSI': self.file_paths[0],
-            'Ćir-UTF8': self.file_paths[1],
-            'Lat-ANSI': self.file_paths[2],
-            'Lat-UTF8': self.file_paths[3],
-        }
-
-        folder_file_names = {
-            folder_name: f_file_names[folder_name] for folder_name in folder_names
-        }
-
-        file_names = [
-            file_name
-            for folder_file_names in folder_file_names.values()
-            for file_name in folder_file_names
-        ]
-
-        # Create the file items for each folder
-        folder_file_items = []
-        for folder_file_names in [
-            f_file_names["Ćir-ANSI"],
-            f_file_names["Ćir-UTF8"],
-            f_file_names["Lat-ANSI"],
-            f_file_names["Lat-UTF8"],
-            ]:
-            folder_file_item_list = []
-            for file_name in folder_file_names:
+        for i, folder_item in enumerate(folder_items):
+            for file_name in files[i]:
                 file_item = QStandardItem(file_name)
-                file_item.setIcon(QIcon(join(I_PATH, 'doc-16.png')))
-                folder_file_item_list.append(file_item)
-            folder_file_items.append(folder_file_item_list)
-
-        # Add the file items to their respective folders
-        for folder_item, folder_file_item_list in zip(folder_items, folder_file_items):
-            for file_item in folder_file_item_list:
+                file_item.setIcon(QIcon(join(I_PATH, "File-24.png")))
                 folder_item.appendRow(file_item)
+            root_item.appendRow(folder_item)
+            
+        if not self.checkBox.isChecked():
 
-        if self.checkBox.isChecked() is False:
-            # Hide the folders
             for row in range(root_item.rowCount()):
-                #folder_item = root_item.child(row)
-                self.treeView.setRowHidden(row, root_item.index(), True)
+                self.treeView.setRowHidden(row, root_item.index(), True)            
+            
+            for file_list in files:
+                for file_name in file_list:
+                    file_item = QStandardItem(file_name)
+                    file_item.setIcon(QIcon(join(I_PATH, 'doc-16.png')))
+                    root_item.appendRow(file_item)
 
-            # Add the file items directly to the root item
-            for file_name in file_names:
-                file_item = QStandardItem(file_name)
-                file_item.setIcon(QIcon(join(I_PATH, 'doc-16.png')))
-                root_item.appendRow(file_item)
         self.treeView.expandToDepth(depth)
         
-    def getData(self):
-        # Define a dictionary to store the data for each folder
-        data = {}
-
-        # Define a recursive function to extract the data from the tree view
-        def extractData(item):
-            # Get the text that is displayed for the item
-            item_text = item.text()
-
-            # If the item is a folder, add an entry for it in the data dictionary
-            if item.hasChildren():
-                data[item_text] = []
-
-            # If the item is a file, add it to the list for the corresponding folder
-            else:
-                # Get a reference to the parent item
-                parent_item = item.parent()
-
-                # If the parent item is not None, get its text
-                if parent_item is not None:
-                    parent_text = parent_item.text()
-                    # Add the file to the list for the corresponding folder
-                    data[parent_text].append(item_text)
-                    
-            # Iterate over the rows of the item
-            for row in range(item.rowCount()):
-                # Get a reference to the child item at the current row
-                child_item = item.child(row)
-
-                # Recursively extract the data from the child item
-                extractData(child_item)
-
-        # Get a reference to the model being used by the tree view
-        model = self.treeView.model()
-
-        # Get the root item of the model
-        root_item = model.invisibleRootItem()
-
-        # Extract the data from the root item
-        extractData(root_item)
-        # clean-up dictionary:
-        data = dict((k, v) for k, v in data.items() if v)
-        if not self.checkBox.isChecked():
-            for data_key in self.GetSelections():
-                data.pop(data_key)
+    def getSelectionIndex(self):
+        self.new_name = self.lineEdit.text()
+        buttons = [
+            self.rButtonCyrANSI,
+            self.rButtonCyrUTF8,
+            self.rButtonLatANSI,
+            self.rButtonLatUTF8,
+        ]
         self.accept()
-        return data
-
+        return [buttons.index(x) for x in buttons if x.isChecked()]
+    
+    def makeFolder(self):
+        buttons = [
+            self.rButtonCyrANSI,
+            self.rButtonCyrUTF8,
+            self.rButtonLatANSI,
+            self.rButtonLatUTF8,
+        ]
+        if self.checkBox.isChecked():
+            return [button.text() for button in buttons]
+        else:
+            return False
+        
     def writeSettings(self):
         MAIN_SETTINGS["EksportZip"] = {"W": self.width(), "H": self.height()}
         
