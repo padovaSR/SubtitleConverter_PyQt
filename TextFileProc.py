@@ -6,7 +6,7 @@ from settings import MAIN_SETTINGS, MULTI_FILE
 from ChoiceDialog import MultiChoiceDialog
 
 import os
-from os.path import basename, dirname, join, normpath, splitext, isfile
+from os.path import basename, dirname, join, normpath, splitext, isfile, exists
 from collections import namedtuple 
 import codecs
 from codecs import BOM_UTF8
@@ -50,8 +50,8 @@ class FileHandler:
         msg.setInformativeText(
             f"Detektovano je pogrešno kodiranje u tekstu.\n"
             f"Pokušaćemo da pronađemo pravi enkodig teksta.\n"
-            f"Ako ipak ima previše grešaka pokušajte drugo\n"
-            f" kodiranje, i opciju ReloadFile.\n\n"
+            f"Ako ipak ima previše grešaka\n"
+            f" pokušajte da otvorite fajl sa drugim kodiranjem.\n\n"
             f"{basename(dialog_title)}"
         )
         msg.setIcon(QMessageBox.Critical)
@@ -61,7 +61,7 @@ class FileHandler:
     @staticmethod
     def fCodeList():
         
-        kodek = MAIN_SETTINGS["CB_value"].strip()
+        kodek = MAIN_SETTINGS["CB_value"]
         if kodek == "auto":
             return [
                 'utf-8',
@@ -102,23 +102,22 @@ class FileHandler:
                         fh.readlines()
                         fh.seek(0)
                 except:
-                    if MAIN_SETTINGS["CB_value"].strip() == "auto":
+                    if MAIN_SETTINGS["CB_value"] == "auto":
                         pass
                     else:
                         self.ErrorDlg(filepath)
                 else:
                     logger.debug(f'{basename(filepath)}: {enc}')
                     break
-            if enc == "windows-1251":
+            if enc == "windows-1251" and MAIN_SETTINGS["CB_value"] == "auto":
                 with open(filepath, "rb") as file_opened:
                     content = file_opened.read()            
                 c = 0
-                for i in "аеио".encode("cp1251"):
+                for i in "аеиo".encode("windows-1251"):
                     if content.find(i) < 0:
                         c += 1
                 if c > 0:
-                    if MAIN_SETTINGS["CB_value"].strip() == "auto":
-                        self.ErrorDlg(filepath)
+                    self.ErrorDlg(filepath)
                     for real_enc in ["utf-8", "windows-1250"]:
                         try:
                             with codecs.open(filepath, "r", encoding=real_enc) as f:
@@ -133,18 +132,18 @@ class FileHandler:
     
     def singleFileInput(self):
         '''Handle single file path'''
-        if type(self.input_files) is list:
+        if isinstance(self.input_files, list):
             filepath = "".join(self.input_files)
         else:
             filepath = self.input_files
         if zipfile.is_zipfile(filepath):
             logger.debug(f'ZIP archive: {basename(filepath)}')
             outfile, rfile = self.isCompressed(filepath) ## outfile in tmp
-            if type(outfile) is str:
+            if isinstance(outfile, str):
                 self.file_encoding = self.findEncoding(outfile)
                 self.real_path=rfile
                 return normalizeText(self.file_encoding, outfile)
-            elif type(outfile) is list:
+            elif isinstance(outfile, list):
                 MULTI_FILE.clear()
                 for i in range(len(outfile)):
                     enc = self.findEncoding(outfile[i])
@@ -180,11 +179,11 @@ class FileHandler:
                 except:
                     logger.debug('FileHandler: No files selected.')
                 else:
-                    if type(outfiles) is str:
+                    if isinstance(outfiles, str):
                         enc = self.findEncoding(outfiles)
                         self.addFilePaths(outfiles, enc, rfiles)
                         self.real_path=rfiles
-                    elif type(outfiles) is list:
+                    elif isinstance(outfiles, list):
                         for i in range(len(outfiles)):
                             enc = self.findEncoding(outfiles[i])
                             self.addFilePaths(outfiles[i], enc, rfiles[i])
@@ -212,7 +211,7 @@ class FileHandler:
                 try:
                     dlg = MultiChoiceDialog(fileName, izbor)
                     dlg.exec()
-                    files = [x for x in dlg.GetSelections() if not x.endswith(".zip")]
+                    files = [izbor[x] for x in dlg.GetSelections()]
                     names = [basename(i) for i in files]
                     outfiles = [normpath(join(basepath, x)) for x in names]
                     rpaths = [normpath(join(dirname(input_file),x)) for x in names]
