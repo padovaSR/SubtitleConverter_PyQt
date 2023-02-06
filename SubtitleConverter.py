@@ -18,6 +18,7 @@ from TextFileProc import FileHandler, DocumentHandler, ErrorsHandler, Transliter
 from resources.find_replace import FindReplaceDialog
 from resources.IsCyrillic import checkCyrillicAlphabet
 from resources.ErrorDialog import ErrorDialog
+from resources import ExportZipFile
 
 from itertools import chain
 import sys
@@ -266,7 +267,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                 new_encoding = "utf-8"
             ext = MAIN_SETTINGS["key5"]["lat_utf8_srt"]
 
-        if len(MULTI_FILE) <= 1:
+        if len(MULTI_FILE) <= 1 and self.single_file:
             text = self.text_1.toPlainText()
             handler = DocumentHandler(self.single_file, text, new_encoding, ext, cyr=self.CYR)
             new_file_name = handler.write_new_file()
@@ -293,8 +294,9 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         if action == "To Cyr":
             new_encoding = "windows-1251"
             ext = MAIN_SETTINGS["key5"]["cyr_ansi_srt"]
-    
-        if len(MULTI_FILE) <= 1:
+            
+        if len(MULTI_FILE) <= 1 and self.single_file:
+            self.cyr_utf8.clear()
             text = self.text_1.toPlainText()
             handler = Transliteracija(self.single_file, text, new_encoding, ext)
             new_file_name = handler.write_transliterated()
@@ -302,6 +304,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                 handler.handleErrors(new_file_name)
                 self.OpenFiles(new_file_name)
                 self.actionReload_file.setEnabled(True)
+                self.CYR = True
             new_utf8_file = handler.write_utf8_file()
             self.cyr_utf8.append(new_utf8_file)
         else:
@@ -318,6 +321,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                 new_utf8_file = handler.write_utf8_file(multi=True)
                 if new_utf8_file:
                     self.cyr_utf8.append(new_utf8_file)
+                    self.CYR = True
             self.setStatus("MultiFiles done", encoding=new_encoding)
             self.infoMessage("\n".join([basename(x) for x in self.new_files]))
                 
@@ -334,7 +338,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                 new_encoding = "utf-8"
             ext = MAIN_SETTINGS["key5"]["lat_utf8_srt"]
             
-        if len(MULTI_FILE) <= 1:
+        if len(MULTI_FILE) <= 1 and self.single_file:
             text = self.text_1.toPlainText()
             handler = Transliteracija(self.single_file, text, new_encoding, ext, reversed_action=True)
             new_file_name = handler.write_transliterated()
@@ -450,14 +454,56 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         
     def exportZIP(self):
         
-        dlg = ZipStructure(file_paths=[["a-1", "a-2", "a-3"], ["b-1", "b-2", "b-3"], ["c-1", "c-2", "c-3"], ["d-1", "d-2", "d-3"]], file_name="Untitled_new.zip")
-        dlg.exec()
-        data = dlg.getData()
-        if data:
-            print("YES")
-        else:
-            print("NO")
-        print("D: ",data)
+        ext_4 = MAIN_SETTINGS["key5"]["lat_utf8_srt"]
+        
+        if len(MULTI_FILE) <= 1 and self.single_file:
+            FileToSave = splitext(self.single_file)[0]
+            fileName, _ = QFileDialog.getSaveFileName(
+                self, str("Save File"), FileToSave, "ZipFiles (*.zip);; All files (*.*)"
+            )
+            if fileName:
+                handler = ExportZipFile.ExportZip([self.single_file], self.cyr_utf8, [self.recent_files[1]], utf8_ext=ext_4)
+                all_paths = handler.collectInfoData()
+                dlg = MultiChoiceDialog(file_path=FileToSave, filelist=all_paths)
+                dlg.exec()
+                selected = dlg.GetSelections() # List with indexes of selected files
+                if not selected:
+                    return                
+                result = handler.WriteZipFile(fileName, selected)
+                if result is True:
+                    self.messageInformation(fileName)
+        elif len(MULTI_FILE) > 1:
+            ofiles = [MULTI_FILE[x].path for x in range(len(MULTI_FILE))]
+            if self.CYR is True:
+                handler = ExportZipFile.ExportZip(self.new_files, self.cyr_utf8, ofiles, utf8_ext=ext_4)
+                all_paths = handler.CreateInfo()
+                FileToSave = handler.file_name(MULTI_FILE[0].path)
+                dlg = ZipStructure(file_paths=all_paths, file_name=FileToSave)
+                dlg.exec()
+                selection = dlg.getSelectionIndex()
+                if not selection:
+                    return                
+                folders = dlg.makeFolder()
+                new_zipFile_name = dlg.new_name
+                result = handler.WriteZipFile(new_zipFile_name, selections=selection, folders=folders)
+                if result is True:
+                    self.messageInformation(new_zipFile_name)                
+            else:
+                FileToSave = splitext(self.new_files[0])[0]
+                fileName, _ = QFileDialog.getSaveFileName(
+                    self, str("Save File"), FileToSave, "ZipFiles (*.zip);; All files (*.*)"
+                )                
+                handler = ExportZipFile.ExportZip(input_1=self.new_files)
+                selection = [1 for x in handler.collectInfoData()]
+                result = handler.WriteZipFile(fileName, selections=selection, folders=False)
+                if result is True:
+                    self.messageInformation(fileName)                
+                
+    @staticmethod
+    def messageInformation(path):
+        message = "<h4>Fajl je uspešno sačuvan</h4>\n"
+        message += f"{basename(path)}"
+        QMessageBox.information(None, " SubtitleConverter", message, QMessageBox.Ok)      
         
     def OnFixerSettings(self):
         dlg = FixerSettings()
