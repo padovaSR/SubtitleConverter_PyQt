@@ -15,7 +15,7 @@ from settings import MAIN_SETTINGS, I_PATH
 
 import sys
 import os
-from os.path import dirname, abspath, join, expanduser, normpath
+from os.path import dirname, abspath, join, expanduser, normpath, basename
 
 root = dirname(dirname(abspath(__file__)))
 
@@ -181,7 +181,12 @@ class ZipStructure(Ui_Dialog, QDialog):
         self.finished.connect(self.writeSettings)
         
         self.setAcceptDrops(True)
-        self.lineEdit.setText(normpath(join(expanduser("~/Desktop"), self.file_name)))
+        first_path = basename(self.file_name)
+        if sys.platform.startswith("linux"):
+            first_path=normpath(join(expanduser("~/Desktop"), first_path))
+        elif sys.platform.startswith("win"):
+            first_path=normpath(join(expanduser("~\Desktop"), first_path))
+        self.lineEdit.setText(first_path)
         self.populateTreeView()
         
         self.show_all = self.checkBox.isChecked()
@@ -242,7 +247,7 @@ class ZipStructure(Ui_Dialog, QDialog):
 
     def populateTreeView(self, depth=0):
 
-        root_item = QStandardItem(self.lineEdit.text())
+        root_item = QStandardItem(basename(self.lineEdit.text()))
         root_item.setIcon(QIcon(join(I_PATH, 'x-zip.png')))
         # Set the root item of the model
         self.model.setItem(0, 0, root_item)
