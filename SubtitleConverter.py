@@ -285,10 +285,6 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                     self.new_files.append(new_file_name)
                     handler.handleErrors(new_file_name)
                     self.setStatus(status1=basename(file_item.path), encoding="")
-                    if checkCyrillicAlphabet(text) is True:
-                        self.CYR = True
-                    else:
-                        self.CYR = False
             self.setStatus("MultiFiles done", encoding=new_encoding)
             self.infoMessage("\n".join([basename(x) for x in self.new_files]))
             
