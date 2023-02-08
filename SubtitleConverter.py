@@ -285,6 +285,10 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                     self.new_files.append(new_file_name)
                     handler.handleErrors(new_file_name)
                     self.setStatus(status1=basename(file_item.path), encoding="")
+                    if checkCyrillicAlphabet(text) is True:
+                        self.CYR = True
+                    else:
+                        self.CYR = False
             self.setStatus("MultiFiles done", encoding=new_encoding)
             self.infoMessage("\n".join([basename(x) for x in self.new_files]))
             
@@ -356,6 +360,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                     handler.handleErrors(new_file_name)
                     self.new_files.append(new_file_name)
                     self.setStatus(status1=basename(file_item.path), encoding="")
+                    self.CYR = False
             self.setStatus("MultiFiles done", encoding=new_encoding)
             self.infoMessage("\n".join([basename(x) for x in self.new_files]))
     
@@ -492,7 +497,9 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                 FileToSave = splitext(self.new_files[0])[0]
                 fileName, _ = QFileDialog.getSaveFileName(
                     self, str("Save File"), FileToSave, "ZipFiles (*.zip);; All files (*.*)"
-                )                
+                )
+                if not fileName:
+                    return
                 handler = ExportZipFile.ExportZip(input_1=self.new_files)
                 selection = [1 for x in handler.collectInfoData()]
                 result = handler.WriteZipFile(fileName, selections=selection, folders=False)
