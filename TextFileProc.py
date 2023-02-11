@@ -145,6 +145,7 @@ class FileHandler:
                 return normalizeText(self.file_encoding, outfile)
             elif isinstance(outfile, list):
                 MULTI_FILE.clear()
+                self.real_path = None
                 for i in range(len(outfile)):
                     enc = self.findEncoding(outfile[i])
                     self.addFilePaths(outfile[i], enc, rfile[i])
@@ -156,6 +157,7 @@ class FileHandler:
                 logger.debug('FileHandler: Ready for multiple files.')
         elif not zipfile.is_zipfile(filepath):
             MULTI_FILE.clear()
+            self.real_path = None
             self.file_encoding = self.findEncoding(filepath)
             self.real_path = filepath
             return normalizeText(self.file_encoding, filepath)
@@ -189,7 +191,8 @@ class FileHandler:
                             self.addFilePaths(outfiles[i], enc, rfiles[i])
         logger.debug('FileHandler: Ready for multiple files.')        
         
-    def isCompressed(self, input_file):
+    @staticmethod
+    def isCompressed(input_file):
 
         basepath = "tmp"
         # basepath = dirname(self.input_files)
