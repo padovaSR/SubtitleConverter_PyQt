@@ -187,7 +187,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             self.OpenFiles(filenames)
     
     def OpenFiles(self, file_paths):
-        if not type(file_paths) is list:
+        if not isinstance(file_paths, list):
             file_paths = [file_paths]
         handler = FileHandler(input_files=file_paths)
         self.CYR = False
@@ -277,6 +277,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                 self.actionReload_file.setEnabled(True)
         else:
             self.new_files.clear()
+            self.cyr_utf8.clear()
             for file_item in MULTI_FILE:
                 text = normalizeText(file_item.enc, file_item.path)
                 handler = DocumentHandler(file_item.realpath, text, new_encoding, ext, cyr=self.CYR)
@@ -359,8 +360,64 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                     self.CYR = False
             self.setStatus("MultiFiles done", encoding=new_encoding)
             self.infoMessage("\n".join([basename(x) for x in self.new_files]))
+
+    def exportZIP(self):
+        
+        ext_4 = MAIN_SETTINGS["key5"]["lat_utf8_srt"]
+        
+        if len(MULTI_FILE) <= 1 and self.single_file:
+            FileToSave = splitext(self.single_file)[0]
+            fileName, _ = QFileDialog.getSaveFileName(
+                self, str("Save File"), FileToSave, "ZipFiles (*.zip);; All files (*.*)"
+            )
+            if fileName:
+                handler = ExportZipFile.ExportZip([self.single_file], self.cyr_utf8, [self.recent_files[1]], utf8_ext=ext_4)
+                all_paths = handler.collectInfoData()
+                dlg = MultiChoiceDialog(file_path=FileToSave, filelist=all_paths)
+                dlg.exec()
+                selected = dlg.GetSelections() # List with indexes of selected files
+                if not selected:
+                    return                
+                result = handler.WriteZipFile(fileName, selected)
+                if result is True:
+                    self.messageInformation(fileName)
+        elif len(MULTI_FILE) > 1:
+            ofiles = [MULTI_FILE[x].path for x in range(len(MULTI_FILE))]
+            if self.CYR is True and self.cyr_utf8:
+                handler = ExportZipFile.ExportZip(self.new_files, self.cyr_utf8, ofiles, utf8_ext=ext_4)
+                all_paths = handler.CreateInfo()
+                FileToSave = handler.file_name(MULTI_FILE[0].path)
+                dlg = ZipStructure(file_paths=all_paths, file_name=FileToSave)
+                dlg.exec()
+                selection = dlg.getSelectionIndex()
+                if not selection:
+                    return                
+                folders = dlg.makeFolder()
+                new_zipFile_name = dlg.new_name
+                result = handler.WriteZipFile(new_zipFile_name, selections=selection, folders=folders)
+                if result is True:
+                    self.messageInformation(new_zipFile_name)                
+            else:
+                FileToSave = splitext(self.new_files[0])[0]
+                fileName, _ = QFileDialog.getSaveFileName(
+                    self, str("Save File"), FileToSave, "ZipFiles (*.zip);; All files (*.*)"
+                )
+                if not fileName:
+                    return
+                handler = ExportZipFile.ExportZip(input_1=self.new_files)
+                selection = [1 for x in handler.collectInfoData()]
+                result = handler.WriteZipFile(fileName, selections=selection, folders=False)
+                if result is True:
+                    self.messageInformation(fileName)                
+                
+    @staticmethod
+    def messageInformation(path):
+        message = "<h4>Fajl je uspešno sačuvan</h4>\n"
+        message += f"{basename(path)}"
+        QMessageBox.information(None, " SubtitleConverter", message, QMessageBox.Ok)
     
-    def infoMessage(self, message):
+    @staticmethod
+    def infoMessage(message):
         msg = QMessageBox()
         msg.setWindowTitle("Subtitle Converter")
         msg.setText("<h3><font color='#3498db'>Files processed:</h3></font>\n")
@@ -452,61 +509,6 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             action = QAction(basename(file_path), self)
             action.triggered.connect(partial(self.OpenFiles, file_path))
             self.recent_menu.addAction(action)
-        
-    def exportZIP(self):
-        
-        ext_4 = MAIN_SETTINGS["key5"]["lat_utf8_srt"]
-        
-        if len(MULTI_FILE) <= 1 and self.single_file:
-            FileToSave = splitext(self.single_file)[0]
-            fileName, _ = QFileDialog.getSaveFileName(
-                self, str("Save File"), FileToSave, "ZipFiles (*.zip);; All files (*.*)"
-            )
-            if fileName:
-                handler = ExportZipFile.ExportZip([self.single_file], self.cyr_utf8, [self.recent_files[1]], utf8_ext=ext_4)
-                all_paths = handler.collectInfoData()
-                dlg = MultiChoiceDialog(file_path=FileToSave, filelist=all_paths)
-                dlg.exec()
-                selected = dlg.GetSelections() # List with indexes of selected files
-                if not selected:
-                    return                
-                result = handler.WriteZipFile(fileName, selected)
-                if result is True:
-                    self.messageInformation(fileName)
-        elif len(MULTI_FILE) > 1:
-            ofiles = [MULTI_FILE[x].path for x in range(len(MULTI_FILE))]
-            if self.CYR is True:
-                handler = ExportZipFile.ExportZip(self.new_files, self.cyr_utf8, ofiles, utf8_ext=ext_4)
-                all_paths = handler.CreateInfo()
-                FileToSave = handler.file_name(MULTI_FILE[0].path)
-                dlg = ZipStructure(file_paths=all_paths, file_name=FileToSave)
-                dlg.exec()
-                selection = dlg.getSelectionIndex()
-                if not selection:
-                    return                
-                folders = dlg.makeFolder()
-                new_zipFile_name = dlg.new_name
-                result = handler.WriteZipFile(new_zipFile_name, selections=selection, folders=folders)
-                if result is True:
-                    self.messageInformation(new_zipFile_name)                
-            else:
-                FileToSave = splitext(self.new_files[0])[0]
-                fileName, _ = QFileDialog.getSaveFileName(
-                    self, str("Save File"), FileToSave, "ZipFiles (*.zip);; All files (*.*)"
-                )
-                if not fileName:
-                    return
-                handler = ExportZipFile.ExportZip(input_1=self.new_files)
-                selection = [1 for x in handler.collectInfoData()]
-                result = handler.WriteZipFile(fileName, selections=selection, folders=False)
-                if result is True:
-                    self.messageInformation(fileName)                
-                
-    @staticmethod
-    def messageInformation(path):
-        message = "<h4>Fajl je uspešno sačuvan</h4>\n"
-        message += f"{basename(path)}"
-        QMessageBox.information(None, " SubtitleConverter", message, QMessageBox.Ok)      
         
     def OnFixerSettings(self):
         dlg = FixerSettings()
