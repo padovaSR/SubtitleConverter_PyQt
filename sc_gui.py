@@ -100,6 +100,12 @@ class Ui_MainWindow(object):
         self.actionReload_file = QAction(MainWindow)
         self.actionReload_file.setObjectName(u"actionReload_file")
         
+        self.actionRenameFiles = QAction(MainWindow)
+        self.actionRenameFiles.setObjectName(u"actionRename")        
+        icon_l = QIcon()
+        icon_l.addFile(join(I_PATH, "ListView.png"), QSize(), QIcon.Normal, QIcon.Off)
+        self.actionRenameFiles.setIcon(icon_l)
+        
         icon6 = QIcon()
         icon6.addFile(join(I_PATH,"reload.png"), QSize(), QIcon.Normal, QIcon.Off)
         self.actionReload_file.setIcon(icon6)
@@ -459,7 +465,7 @@ class Ui_MainWindow(object):
         self.menuZoom.setTitle(u"Zoom")
         self.menuFormat.setTitle(u"Format")
         self.toolBar.setWindowTitle(u"toolBar")        
-        
+        ##=================================================================================##
         self.menuFile.addAction(self.actionOpen)
         self.actionOpen.setText(u"Open")
         self.actionOpen.setStatusTip(u"Open")
@@ -493,6 +499,11 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionExport_ZIP)
         self.actionExport_ZIP.setText(u"Export ZIP")
         self.actionExport_ZIP.setShortcut(shortcutsKeys["Export_ZIP"])
+        self.menuFile.addSeparator()
+        
+        self.menuFile.addAction(self.actionRenameFiles)
+        self.actionRenameFiles.setText("Rename subtitles")
+        self.actionRenameFiles.setShortcut(shortcutsKeys["Renamer"])
         self.menuFile.addSeparator()
         
         self.menuFile.addAction(self.actionClose)
