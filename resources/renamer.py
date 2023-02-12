@@ -8,29 +8,73 @@
 
 from PySide2.QtCore import QSize, Qt, QDir
 from PySide2.QtGui import QIcon, QFont
-from PySide2.QtWidgets import (QDialog, QApplication, QVBoxLayout, QHBoxLayout, QLayout, QGridLayout, QLabel,  
+from PySide2.QtWidgets import (QDialog, QApplication, QVBoxLayout, QHBoxLayout, QLayout, QGridLayout, QLabel, QMessageBox,  
                                QPlainTextEdit, QTreeView, QSizePolicy, QAbstractItemView, QDialogButtonBox, QFileSystemModel)
 
 import sys
 import json
 import os
+import re
+import shutil
 import getpass
 import platform
-from os.path import join
+from os.path import basename, join, dirname, split, splitext
 from collections import defaultdict
+
 
 import logging.config
 logger = logging.getLogger(__name__)
 
 
 def LoadSettings():
-    settings_file = join("var", "renamer_settings.json")
+    settings_file = join("resources", "var", "renamer_settings.json")
     SETTINGS=defaultdict(str)
     with open(settings_file, "r") as f:
         SETTINGS.update(json.loads(f.read()))
     return SETTINGS
 
 SETTINGS = LoadSettings()
+
+class CollectFiles:
+    """"""
+    EP = re.compile(r"epi(z|s)od(a|e)\s*-?\s*\W*\s*\d{,2}\.?|s\d{1,2}e\d{1,2}\.?|^\d{1,2}\.srt", (re.I|re.M))
+    RP = re.compile(r"\d{4}\.?|(x|h)\.?26(4|5)|N(10|265)", re.I)
+    subtitles = []
+    def __init__(self, selected_folder=None):
+        self.selected_folder = selected_folder
+        
+    def listFiles(self, ext):
+        """"""
+        folderIn = self.selected_folder
+        subs_list = []
+        vids_list = []
+        self.subtitles.clear()
+        with os.scandir(folderIn) as it:
+            for entry in it:
+                if not entry.name.startswith('.') and entry.is_file():
+                    if entry.name.lower().endswith(ext):
+                        if self.EP.search(self.RP.sub('', entry.name)):
+                            subs_list.append(entry.name)
+                            self.subtitles.append(join(folderIn, entry.name))
+                            self.subtitles.sort()
+                    if entry.name.lower().endswith((".mp4", ".mkv", ".avi")):
+                        if self.EP.search(self.RP.sub('', entry.name)):
+                            vids_list.append(entry.name)
+            if not vids_list:
+                message = "<h4>Missing Files</h4>\n"
+                message += f"Unable to find video files.\nFiles required as reference."
+                QMessageBox.critical(None, " Renamer", message, QMessageBox.Ok)
+        return sorted(subs_list), sorted(vids_list)    
+    
+    def newFiles(self, subs=[], vids=[], ext=None):
+        """"""
+        new_files_list = []
+        for pair in zip(subs, vids):
+            a = re.match(r"\d{1,2}", str(self.EP.search(self.RP.sub('', pair[1]))))
+            b = re.match(r"\d{1,2}", str(self.EP.search(self.RP.sub('', pair[0]))))        
+            if a == b:
+                new_files_list.append(f"{splitext(pair[1])[0]}{ext}")
+        return new_files_list    
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -72,41 +116,52 @@ class Ui_Dialog(object):
         self.verticalLayout = QVBoxLayout()
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setSizeConstraint(QLayout.SetMaximumSize)
-        self.plainTextEdit = QPlainTextEdit(Dialog)
-        self.plainTextEdit.setObjectName(u"plainTextEdit")
-        self.plainTextEdit.setToolTip(u"<html><head/><body><p>DragAndDrop enabled</p><p>Lista originalnih fajlova</p></body></html>")
-        self.plainTextEdit.setTabChangesFocus(True)
-        self.plainTextEdit.setUndoRedoEnabled(True)
-        self.plainTextEdit.setPlainText(u"")
-        self.plainTextEdit.setTextInteractionFlags(Qt.TextSelectableByKeyboard|Qt.TextSelectableByMouse)
+        
+        font1 = QFont()
+        font1.setFamily("Segoe UI semibold")
+        font1.setPointSize(10)
+        self.text_1 = QPlainTextEdit(Dialog)
+        self.text_1.setObjectName(u"text_1")
+        self.text_1.setToolTip(u"<html><head/><body><p>DragAndDrop enabled</p><p>Lista originalnih fajlova</p></body></html>")
+        self.text_1.setTabChangesFocus(True)
+        self.text_1.setUndoRedoEnabled(True)
+        self.text_1.setFont(font1)
+        self.text_1.setPlainText(u"")
+        self.text_1.setTextInteractionFlags(Qt.TextSelectableByKeyboard|Qt.TextSelectableByMouse)
 
-        self.verticalLayout.addWidget(self.plainTextEdit)
+        self.verticalLayout.addWidget(self.text_1)
 
-        self.plainTextEdit_2 = QPlainTextEdit(Dialog)
-        self.plainTextEdit_2.setObjectName(u"plainTextEdit_2")
-        self.plainTextEdit_2.setToolTip(u"Lista preimenovanih fajlova")
-        self.plainTextEdit_2.setTabChangesFocus(True)
-        self.plainTextEdit_2.setUndoRedoEnabled(True)
-        self.plainTextEdit_2.setPlainText(u"")
+        self.text_2 = QPlainTextEdit(Dialog)
+        self.text_2.setObjectName(u"text_2")
+        self.text_2.setFont(font1)
+        self.text_2.setToolTip(u"Lista preimenovanih fajlova")
+        self.text_2.setTabChangesFocus(True)
+        self.text_2.setUndoRedoEnabled(True)
+        self.text_2.setPlainText(u"")
 
-        self.verticalLayout.addWidget(self.plainTextEdit_2)
+        self.verticalLayout.addWidget(self.text_2)
         self.verticalLayout_2.addLayout(self.verticalLayout)
         self.gridLayout.addLayout(self.verticalLayout_2, 0, 1, 2, 1)
 
         self.treeView = QTreeView(Dialog)
         self.treeView.setObjectName(u"treeView")
+        
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.treeView.sizePolicy().hasHeightForWidth())
+        
         self.treeView.setSizePolicy(sizePolicy)
-        self.treeView.setMinimumSize(QSize(180, 0))
-        self.treeView.setMaximumSize(QSize(190, 16777215))
+        self.treeView.setMinimumSize(QSize(190, 0))
+        self.treeView.setMaximumSize(QSize(236, 16777215))
         self.treeView.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.treeView.setDragEnabled(True)
         self.treeView.setIconSize(QSize(16, 16))
         self.treeView.setProperty("translatable", u"")
-
+        
+        self.model = QFileSystemModel()
+        self.treeView.setModel(self.model)
+        
         self.gridLayout.addWidget(self.treeView, 1, 0, 1, 1)
 
         self.horizontalLayout_2 = QHBoxLayout()
@@ -141,20 +196,91 @@ class RenameFiles(Ui_Dialog, QDialog):
         super(RenameFiles, self).__init__(parent)
         self.setupUi(self)
         
-        self.model = QFileSystemModel()
-        self.treeView.setModel(self.model)
-
-        self.buttonBox.accepted.connect(self.OnAccept)
+        self.buttonBox.accepted.connect(self.renameFiles)
         self.buttonBox.rejected.connect(self.onRejected)
-        self.treeView.doubleClicked.connect(self.setup_tree_view)
+        self.treeView.doubleClicked.connect(self.ActivatedFolder)
+        self.treeView.clicked.connect(self.getSelectedFolder)
         
         self.closeEvent = self.on_close_event
         
         self.setup_tree_view()
+        
+        self.current_path = None
+        self.suffix = ".srt"
+        self.vid_suffix = ".mkv"
+        
+        self.subtitles = []
+        self.renamed = []
+        
+    def getNames(self):
+        self.text_1.clear()
+        self.text_2.clear()
+        collector = CollectFiles(self.current_path)
+        try:
+            title_list,video_list = collector.listFiles(self.suffix)
+            new_file_list = collector.newFiles(title_list, video_list, self.suffix)
+            self.vid_suffix = splitext(video_list[0])[1]
+            self.subtitles = collector.subtitles
+            
+            for title_name in title_list:
+                self.text_1.appendPlainText(f"{title_name}")
+            for file_name in new_file_list:
+                self.text_2.appendPlainText(f"{file_name}")
+        except Exception as e:
+                logger.debug(f"Error: {e}")
+            
+    def renameFiles(self):
+        ''''''
+        renamed = self.renamed
+        renamed.clear()
+        lines = self.text_2.blockCount()
+        if lines > 1:
+            pl_name = f"{split(dirname(self.subtitles[0]))[1]}.m3u"
+            pl_file = join(dirname(self.subtitles[0]), pl_name)
+            with open(pl_file, "w", encoding="utf-8") as pl:
+                pl.write(f"#{basename(pl_file)[:-4]} Playlist\n")
+            playlist = open(pl_file, "a", encoding="utf-8")
+            document = self.text_2.document()
+        for i in range(0, lines):
+            try:
+                line = document.findBlockByNumber(i).text().strip()
+                new_name = join(dirname(self.subtitles[i]), line)
+                shutil.move(self.subtitles[i], new_name)
+                renamed.append(f"{line}\n")
+                playlist.write(f"{splitext(line)[0]}{self.vid_suffix}\n")                
+                logger.debug(f"{basename(self.subtitles[i])} -> {line}")
+            except Exception as e:
+                logger.debug(f"{e}")
+        playlist.close()
+        self.subtitles.clear()
+        self.checkRenamed()
     
+    def checkRenamed(self):
+        """"""
+        collector = CollectFiles(self.current_path)
+        s_list, v = collector.listFiles(self.suffix)
+        renamed = [item.strip() for item in self.renamed]
+        try:
+            if len(s_list) == len(renamed) and all(a == b for a, b in zip(s_list, renamed)) is True:
+                flattened_list = "\n".join(s_list)
+                message = "<h4>Fajlovi su uspešno preimenovani</h4>\n"
+                message += f"{flattened_list}"
+                QMessageBox.information(None, " Renamer", message, QMessageBox.Ok)
+        except (TypeError, Exception) as e:
+            logger.debug(f"Error: {e}")
+    
+    def getSelectedFolder(self):
+        index = self.treeView.currentIndex()
+        file_path = self.model.filePath(index)
+        self.root_label.setText(os.path.basename(file_path))
+        self.label_2.setText(os.path.normpath(file_path))        
+        
     def ActivatedFolder(self):
         """"""
-        print("Activated!")
+        index = self.treeView.currentIndex()
+        file_path = self.model.filePath(index)
+        self.current_path = file_path
+        self.getNames()
         
     def setup_tree_view(self):
 
@@ -183,6 +309,8 @@ class RenameFiles(Ui_Dialog, QDialog):
         # Set up the QFileSystemModel
         self.model.setRootPath((QDir.rootPath()))
         self.model.setFilter(QDir.NoDotAndDotDot | QDir.AllDirs)
+        # self.model.setFilter(QDir.Files | QDir.NoDotAndDotDot | QDir.AllDirs)
+        # self.model.setFilter(QDir.NoDotAndDotDot | QDir.Files)
         self.treeView.setRootIndex(self.model.index(root_folder))
         self.treeView.setSortingEnabled(True)
         self.label.setText(root_folder)
@@ -191,30 +319,18 @@ class RenameFiles(Ui_Dialog, QDialog):
         self.treeView.hideColumn(1)
         self.treeView.hideColumn(2)
         self.treeView.hideColumn(3)
-        self.treeView.clicked.connect(self.on_treeView_clicked)
         # Set the selection    
         predefined_folder = SETTINGS["Folder"]["Selected"]
         index = self.model.index(predefined_folder)
         self.treeView.setCurrentIndex(index)
         self.root_label.setText(os.path.normpath(predefined_folder))
         self.label_2.setText(os.path.normpath(predefined_folder))
-        # Activate folder
-        self.ActivatedFolder()
         
-    def on_treeView_clicked(self, index):
-        file_path = self.model.filePath(index)
-        self.root_label.setText(os.path.basename(file_path))
-        self.label_2.setText(os.path.normpath(file_path))
-    
-    def OnAccept(self):
-        self.writeSettings()
-        self.accept()
-
     def writeSettings(self):
         """"""
         SETTINGS["Size"] = {"W": self.width(), "H": self.height()}
         SETTINGS["Folder"] = {"Selected": self.label_2.text()}
-        with open(join("var", "renamer_settings.json"), "w") as wf:
+        with open(join("resources", "var", "renamer_settings.json"), "w") as wf:
             wf.write(json.dumps(SETTINGS, ensure_ascii=False, indent=4))        
 
     def on_close_event(self, event):
@@ -222,7 +338,7 @@ class RenameFiles(Ui_Dialog, QDialog):
         event.accept()
 
     def onRejected(self):
-        # Close the dialog when the rejected signal is emitted
+        self.writeSettings()
         self.close()        
 
 
