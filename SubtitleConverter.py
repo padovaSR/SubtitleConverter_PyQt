@@ -19,13 +19,12 @@ from resources.find_replace import FindReplaceDialog
 from resources.IsCyrillic import checkCyrillicAlphabet
 from resources.ErrorDialog import ErrorDialog
 from resources import ExportZipFile
+from resources.renamer import RenameFiles
 
-from itertools import chain
 import sys
 import json
 import shutil
 import linecache
-import re
 import os
 from os.path import join, basename, normpath, exists, splitext
 from collections import deque
@@ -65,6 +64,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.actionSave_as.triggered.connect(self.SaveAs)
         self.actionReload_file.triggered.connect(self.ReloadFile)
         self.actionExport_ZIP.triggered.connect(self.exportZIP)
+        self.actionRenameFiles.triggered.connect(self.RenameFiles)
         self.actionQuit.triggered.connect(self.onQuit)
         ##======================================================================##
         self.actionFont.triggered.connect(self.fontDialog)
@@ -425,6 +425,11 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         msg.setIcon(QMessageBox.Information)
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
+        
+    def RenameFiles(self):
+        """"""
+        handler = RenameFiles(self)
+        handler.exec()
     
     def SaveFile(self):
         """"""
