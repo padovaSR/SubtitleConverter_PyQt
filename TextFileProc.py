@@ -6,7 +6,7 @@ from settings import MAIN_SETTINGS, MULTI_FILE
 from ChoiceDialog import MultiChoiceDialog
 
 import os
-from os.path import basename, dirname, join, normpath, splitext, isfile, exists
+from os.path import basename, dirname, join, normpath, splitext, isfile
 from collections import namedtuple 
 import codecs
 from codecs import BOM_UTF8
