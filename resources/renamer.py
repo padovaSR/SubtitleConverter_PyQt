@@ -99,7 +99,7 @@ class Ui_Dialog(object):
         font.setPointSize(10)
         self.label.setFont(font)
         self.label.setText(u"Izaberi folder")
-        self.label.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label.setTextInteractionFlags(Qt.TextSelectableByKeyboard|Qt.TextSelectableByMouse)
 
         self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
 
@@ -155,6 +155,7 @@ class Ui_Dialog(object):
         self.treeView.setMinimumSize(QSize(263, 0))
         self.treeView.setMaximumSize(QSize(263, 16777215))
         self.treeView.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.treeView.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.treeView.setDragEnabled(True)
         self.treeView.setIconSize(QSize(16, 16))
         self.treeView.setProperty("translatable", u"")
@@ -175,7 +176,7 @@ class Ui_Dialog(object):
         sizePolicy1.setHeightForWidth(self.label_2.sizePolicy().hasHeightForWidth())
         self.label_2.setSizePolicy(sizePolicy1)
         self.label_2.setText(u"Trenutni folder")
-        self.label_2.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.label_2.setTextInteractionFlags(Qt.TextSelectableByKeyboard|Qt.TextSelectableByMouse)
 
         self.horizontalLayout_2.addWidget(self.label_2)
 
@@ -183,7 +184,7 @@ class Ui_Dialog(object):
         self.buttonBox.setObjectName(u"buttonBox")
         self.buttonBox.setOrientation(Qt.Horizontal)
         self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Ok)
-
+        
         self.horizontalLayout_2.addWidget(self.buttonBox)
 
         self.gridLayout.addLayout(self.horizontalLayout_2, 2, 0, 1, 2)
@@ -199,7 +200,9 @@ class RenameFiles(Ui_Dialog, QDialog):
         self.buttonBox.accepted.connect(self.renameFiles)
         self.buttonBox.rejected.connect(self.onRejected)
         self.treeView.doubleClicked.connect(self.ActivatedFolder)
+        # self.treeView.activated.connect(self.ActivatedFolder)
         self.treeView.clicked.connect(self.getSelectedFolder)
+        self.treeView.selectionModel().selectionChanged.connect(self.getSelectedFolder)
         
         self.closeEvent = self.on_close_event
         
