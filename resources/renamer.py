@@ -6,7 +6,7 @@
 ## Modified by padovaSR
 ##
 
-from PySide2.QtCore import QSize, Qt, QDir
+from PySide2.QtCore import QSize, Qt, QDir, QFileInfo
 from PySide2.QtGui import QIcon, QFont
 from PySide2.QtWidgets import (QDialog, QApplication, QVBoxLayout, QHBoxLayout, QLayout, QGridLayout, QLabel, QMessageBox,  
                                QPlainTextEdit, QTreeView, QSizePolicy, QAbstractItemView, QDialogButtonBox, QFileSystemModel)
@@ -38,7 +38,7 @@ SETTINGS = LoadSettings()
 class CollectFiles:
     """"""
     EP = re.compile(r"epi(z|s)od(a|e)\s*-?\s*\W*\s*\d{,2}\.?|s\d{1,2}e\d{1,2}\.?|^\d{1,2}\.srt", (re.I|re.M))
-    RP = re.compile(r"\d{4}\.?|(x|h)\.?26(4|5)|N(10|265)", re.I)
+    RP = re.compile(r"\d{4}\.?|(x|h)\.?26(4|5)|N(10|265)|5\.1\.?", re.I)
     subtitles = []
     def __init__(self, selected_folder=None):
         self.selected_folder = selected_folder
@@ -203,6 +203,9 @@ class RenameFiles(Ui_Dialog, QDialog):
         
         self.closeEvent = self.on_close_event
         
+        self.text_2.setAcceptDrops(False)
+        self.setAcceptDrops(True)
+        
         self.setup_tree_view()
         
         self.current_path = None
@@ -211,6 +214,28 @@ class RenameFiles(Ui_Dialog, QDialog):
         
         self.subtitles = []
         self.renamed = []
+
+    def dragEnterEvent(self, event):
+        if not event.mimeData().hasUrls():
+            event.ignore()
+            return
+        for url in event.mimeData().urls():
+            if QFileInfo(url.toLocalFile()).isDir():
+                event.accept()
+                event.setDropAction(Qt.CopyAction)
+                break
+        else:
+            event.ignore()
+            
+    def dropEvent(self, event):
+        if not event.mimeData().hasUrls():
+            return
+        for url in event.mimeData().urls():
+            file_path = url.toLocalFile()
+            if QFileInfo(file_path).isDir():
+                self.current_path = file_path
+                break
+        self.ActivatedFolder()    
         
     def getNames(self):
         self.text_1.clear()
