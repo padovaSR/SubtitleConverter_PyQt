@@ -275,7 +275,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                 handler.handleErrors(new_file_name)
                 self.OpenFiles(new_file_name)
                 self.actionReload_file.setEnabled(True)
-        else:
+        elif len(MULTI_FILE) > 1:
             self.new_files.clear()
             self.cyr_utf8.clear()
             for file_item in MULTI_FILE:
@@ -308,7 +308,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                 self.CYR = True
             new_utf8_file = handler.write_utf8_file()
             self.cyr_utf8.append(new_utf8_file)
-        else:
+        elif len(MULTI_FILE) > 1:
             self.new_files.clear()
             self.cyr_utf8.clear()
             for file_item in MULTI_FILE:
@@ -347,7 +347,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                 handler.handleErrors(new_file_name)
                 self.OpenFiles(new_file_name)
                 self.actionReload_file.setEnabled(True)
-        else:
+        elif len(MULTI_FILE) > 1:
             self.new_files.clear()
             for file_item in MULTI_FILE:
                 text = normalizeText(file_encoding=file_item.enc, filepath=file_item.path)
