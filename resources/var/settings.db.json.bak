@@ -66,5 +66,10 @@
     "EksportZip": {
         "W": 648,
         "H": 506
+    },
+    "Renamer": {
+        "W": 828,
+        "H": 667,
+        "Selected": "C:\\Users\\darkstar\\Desktop\\SUBS"
     }
 }
