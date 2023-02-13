@@ -152,8 +152,8 @@ class Ui_Dialog(object):
         sizePolicy.setHeightForWidth(self.treeView.sizePolicy().hasHeightForWidth())
         
         self.treeView.setSizePolicy(sizePolicy)
-        self.treeView.setMinimumSize(QSize(190, 0))
-        self.treeView.setMaximumSize(QSize(236, 16777215))
+        self.treeView.setMinimumSize(QSize(263, 0))
+        self.treeView.setMaximumSize(QSize(263, 16777215))
         self.treeView.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.treeView.setDragEnabled(True)
         self.treeView.setIconSize(QSize(16, 16))
