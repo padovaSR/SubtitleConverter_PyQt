@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 def LoadSettings():
-    settings_file = join("resources", "var", "renamer_settings.json")
+    settings_file = join("resources", "var", "settings.db.json")
     SETTINGS=defaultdict(str)
     with open(settings_file, "r") as f:
         SETTINGS.update(json.loads(f.read()))
@@ -81,7 +81,7 @@ class Ui_Dialog(object):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
         # Dialog.resize(600, 572)
-        Dialog.resize(SETTINGS["Size"]["W"], SETTINGS["Size"]["H"])
+        Dialog.resize(SETTINGS["Renamer"]["W"], SETTINGS["Renamer"]["H"])
         Dialog.setWindowTitle(u"Renamer")
         icon = QIcon()
         icon.addFile(join("icons","ListView.png"), QSize(), QIcon.Normal, QIcon.Off)
@@ -258,15 +258,15 @@ class RenameFiles(Ui_Dialog, QDialog):
         ''''''
         renamed = self.renamed
         renamed.clear()
-        lines = self.text_2.blockCount()
-        if lines > 1:
+        playlist = None
+        if self.text_2.blockCount() > 1:
             pl_name = f"{split(dirname(self.subtitles[0]))[1]}.m3u"
             pl_file = join(dirname(self.subtitles[0]), pl_name)
             with open(pl_file, "w", encoding="utf-8") as pl:
                 pl.write(f"#{basename(pl_file)[:-4]} Playlist\n")
             playlist = open(pl_file, "a", encoding="utf-8")
             document = self.text_2.document()
-        for i in range(0, lines):
+        for i in range(self.text_2.blockCount()):
             try:
                 line = document.findBlockByNumber(i).text().strip()
                 new_name = join(dirname(self.subtitles[i]), line)
@@ -276,7 +276,7 @@ class RenameFiles(Ui_Dialog, QDialog):
                 logger.debug(f"{basename(self.subtitles[i])} -> {line}")
             except Exception as e:
                 logger.debug(f"{e}")
-        playlist.close()
+        if playlist: playlist.close()
         self.subtitles.clear()
         self.checkRenamed()
     
@@ -285,14 +285,15 @@ class RenameFiles(Ui_Dialog, QDialog):
         collector = CollectFiles(self.current_path)
         s_list, v = collector.listFiles(self.suffix)
         renamed = [item.strip() for item in self.renamed]
-        try:
-            if len(s_list) == len(renamed) and all(a == b for a, b in zip(s_list, renamed)) is True:
-                flattened_list = "\n".join(s_list)
-                message = "<h4>Fajlovi su uspešno preimenovani</h4>\n"
-                message += f"{flattened_list}"
-                QMessageBox.information(None, " Renamer", message, QMessageBox.Ok)
-        except (TypeError, Exception) as e:
-            logger.debug(f"Error: {e}")
+        if s_list and renamed:
+            try:
+                if len(s_list) == len(renamed) and all(a == b for a, b in zip(s_list, renamed)) is True:
+                    flattened_list = "\n".join(s_list)
+                    message = "<h4>Fajlovi su uspešno preimenovani</h4>\n"
+                    message += f"{flattened_list}"
+                    QMessageBox.information(None, " Renamer", message, QMessageBox.Ok)
+            except (TypeError, Exception) as e:
+                logger.debug(f"Error: {e}")
     
     def getSelectedFolder(self):
         index = self.treeView.currentIndex()
@@ -345,7 +346,7 @@ class RenameFiles(Ui_Dialog, QDialog):
         self.treeView.hideColumn(2)
         self.treeView.hideColumn(3)
         # Set the selection    
-        predefined_folder = SETTINGS["Folder"]["Selected"]
+        predefined_folder = SETTINGS["Renamer"]["Selected"]
         index = self.model.index(predefined_folder)
         self.treeView.setCurrentIndex(index)
         self.root_label.setText(os.path.normpath(predefined_folder))
@@ -353,10 +354,11 @@ class RenameFiles(Ui_Dialog, QDialog):
         
     def writeSettings(self):
         """"""
-        SETTINGS["Size"] = {"W": self.width(), "H": self.height()}
-        SETTINGS["Folder"] = {"Selected": self.label_2.text()}
-        with open(join("resources", "var", "renamer_settings.json"), "w") as wf:
-            wf.write(json.dumps(SETTINGS, ensure_ascii=False, indent=4))        
+        SETTINGS["Renamer"] = {"W": self.width(), "H": self.height(), "Selected": self.label_2.text()}
+        settings_file = join("resources", "var", "settings.db.json") 
+        with open(settings_file, "w") as wf:
+            wf.write(json.dumps(SETTINGS, ensure_ascii=False, indent=4))
+        shutil.copyfile(settings_file, settings_file+".bak")
 
     def on_close_event(self, event):
         self.writeSettings()
