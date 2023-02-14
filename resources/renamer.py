@@ -12,7 +12,6 @@ from PySide2.QtWidgets import (QDialog, QApplication, QVBoxLayout, QHBoxLayout, 
                                QPlainTextEdit, QTreeView, QSizePolicy, QAbstractItemView, QDialogButtonBox, QFileSystemModel)
 
 import sys
-import json
 import os
 import re
 import shutil
@@ -27,8 +26,6 @@ from settings import MAIN_SETTINGS
 
 import logging.config
 logger = logging.getLogger(__name__)
-
- 
 
 
 class CollectFiles:
