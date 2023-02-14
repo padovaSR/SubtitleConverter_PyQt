@@ -18,22 +18,18 @@ import re
 import shutil
 import getpass
 import platform
-from os.path import basename, join, dirname, split, splitext
+from os.path import basename, join, dirname, split, splitext, abspath
 from collections import defaultdict
 
+sys.path.append("../")
+
+from settings import MAIN_SETTINGS
 
 import logging.config
 logger = logging.getLogger(__name__)
 
+ 
 
-def LoadSettings():
-    settings_file = join("resources", "var", "settings.db.json")
-    SETTINGS=defaultdict(str)
-    with open(settings_file, "r") as f:
-        SETTINGS.update(json.loads(f.read()))
-    return SETTINGS
-
-SETTINGS = LoadSettings()
 
 class CollectFiles:
     """"""
@@ -81,7 +77,7 @@ class Ui_Dialog(object):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
         # Dialog.resize(600, 572)
-        Dialog.resize(SETTINGS["Renamer"]["W"], SETTINGS["Renamer"]["H"])
+        Dialog.resize(MAIN_SETTINGS["Renamer"]["W"], MAIN_SETTINGS["Renamer"]["H"])
         Dialog.setWindowTitle(u"Renamer")
         icon = QIcon()
         icon.addFile(join("icons","ListView.png"), QSize(), QIcon.Normal, QIcon.Off)
@@ -164,6 +160,7 @@ class Ui_Dialog(object):
         self.treeView.setModel(self.model)
         
         self.gridLayout.addWidget(self.treeView, 1, 0, 1, 1)
+        self.treeView.header().setCascadingSectionResizes(True)
 
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
@@ -182,6 +179,7 @@ class Ui_Dialog(object):
 
         self.buttonBox = QDialogButtonBox(Dialog)
         self.buttonBox.setObjectName(u"buttonBox")
+        self.buttonBox.setFocusPolicy(Qt.TabFocus)
         self.buttonBox.setOrientation(Qt.Horizontal)
         self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Ok)
         
@@ -302,7 +300,7 @@ class RenameFiles(Ui_Dialog, QDialog):
         index = self.treeView.currentIndex()
         file_path = self.model.filePath(index)
         self.root_label.setText(os.path.basename(file_path))
-        self.label_2.setText(os.path.normpath(file_path))        
+        self.label_2.setText(os.path.normpath(file_path))
         
     def ActivatedFolder(self):
         """"""
@@ -349,7 +347,7 @@ class RenameFiles(Ui_Dialog, QDialog):
         self.treeView.hideColumn(2)
         self.treeView.hideColumn(3)
         # Set the selection    
-        predefined_folder = SETTINGS["Renamer"]["Selected"]
+        predefined_folder = MAIN_SETTINGS["Renamer"]["Selected"]
         index = self.model.index(predefined_folder)
         self.treeView.setCurrentIndex(index)
         self.root_label.setText(os.path.normpath(predefined_folder))
@@ -357,12 +355,8 @@ class RenameFiles(Ui_Dialog, QDialog):
         
     def writeSettings(self):
         """"""
-        SETTINGS["Renamer"] = {"W": self.width(), "H": self.height(), "Selected": self.label_2.text()}
-        settings_file = join("resources", "var", "settings.db.json") 
-        with open(settings_file, "w") as wf:
-            wf.write(json.dumps(SETTINGS, ensure_ascii=False, indent=4))
-        shutil.copyfile(settings_file, settings_file+".bak")
-
+        MAIN_SETTINGS["Renamer"] = {"W": self.width(), "H": self.height(), "Selected": self.label_2.text()}
+        
     def on_close_event(self, event):
         self.writeSettings()
         event.accept()
