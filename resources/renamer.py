@@ -18,7 +18,7 @@ import re
 import shutil
 import getpass
 import platform
-from os.path import basename, join, dirname, split, splitext, abspath
+from os.path import basename, join, dirname, split, splitext
 from collections import defaultdict
 
 sys.path.append("../")
