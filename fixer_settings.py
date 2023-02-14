@@ -223,7 +223,6 @@ class FixerSettings(Ui_Dialog, QDialog):
         }
         MAIN_SETTINGS["key1"].update(NewSettings)
         self.accept()
-
                 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
