@@ -13,13 +13,15 @@ from zip_confirm import ZipStructure
 from fixer_settings import FixerSettings
 from settings_dialog import MainSettings
 from merger_settings import MergerSettings
-from TextFileProc import FileHandler, DocumentHandler, ErrorsHandler, Transliteracija, normalizeText, CleanSubtitles
+from TextFileProc import FileHandler, DocumentHandler, ErrorsHandler, Transliteracija, normalizeText
 
 from resources.find_replace import FindReplaceDialog
 from resources.IsCyrillic import checkCyrillicAlphabet
 from resources.ErrorDialog import ErrorDialog
-from resources import ExportZipFile
 from resources.renamer import RenameFiles
+from resources.FixSubtitles import SubtitleFixer
+from resources import ExportZipFile
+ 
 
 import sys
 import json
@@ -29,7 +31,6 @@ import os
 from os.path import join, basename, normpath, exists, splitext
 from collections import deque
 from functools import partial
-import srt
 
 import logging.config
 logging.config.fileConfig("resources/var/log/mainlog.ini", disable_existing_loggers=False)
@@ -445,7 +446,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         
         if len(MULTI_FILE) < 1 and self.single_file:
             text = self.text_1.toPlainText()
-            fixer = CleanSubtitles(text_in=text, file_path=self.single_file, enc=self.file_enc)
+            fixer = SubtitleFixer(text_in=text)
             text = fixer.FixSubtileText()
             handler = DocumentHandler(self.single_file, text, self.file_enc, ext_f)
             new_path = handler.write_new_file(True, False)
