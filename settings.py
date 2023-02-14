@@ -5,6 +5,7 @@
 import os
 import json
 import zipfile
+from io import StringIO
 from collections import defaultdict, OrderedDict
 
 from resources.DictHandle import Dictionaries 
@@ -16,6 +17,8 @@ droppedText = os.path.join('resources', 'var', 'r_text0.pkl')
 main_settings_file = os.path.join("resources", "var", "settings.db.json")
 
 I_PATH = os.path.join("resources", "icons")
+
+WORK_TEXT = StringIO()
 
 FILE_HISTORY = []
 
