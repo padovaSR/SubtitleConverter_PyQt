@@ -6,14 +6,14 @@ from PySide2.QtGui import QFont, QTextCursor
 from PySide2.QtCore import Qt, QFileInfo, QDir, QEventLoop, QTimer
 
 from sc_gui import Ui_MainWindow
-from settings import MAIN_SETTINGS, MULTI_FILE, main_settings_file, log_file_history, printEncoding, updateRecentFiles
+from settings import MAIN_SETTINGS, MULTI_FILE, WORK_TEXT, main_settings_file, log_file_history, printEncoding, updateRecentFiles
 from MultiSelection import MultiFiles 
 from ChoiceDialog import MultiChoiceDialog
 from zip_confirm import ZipStructure
 from fixer_settings import FixerSettings
 from settings_dialog import MainSettings
 from merger_settings import MergerSettings
-from TextFileProc import FileHandler, DocumentHandler, ErrorsHandler, Transliteracija, normalizeText
+from TextFileProc import FileHandler, DocumentHandler, ErrorsHandler, Transliteracija, normalizeText, CleanSubtitles
 
 from resources.find_replace import FindReplaceDialog
 from resources.IsCyrillic import checkCyrillicAlphabet
@@ -29,6 +29,7 @@ import os
 from os.path import join, basename, normpath, exists, splitext
 from collections import deque
 from functools import partial
+import srt
 
 import logging.config
 logging.config.fileConfig("resources/var/log/mainlog.ini", disable_existing_loggers=False)
@@ -90,8 +91,8 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.actionCYR.triggered.connect(self.LatinToCyrillic)
         self.actionCyrToAnsi.triggered.connect(self.CyrillicToLatin)
         self.actionCyrToUTF8.triggered.connect(self.CyrillicToLatin)
-        ##======================================================================##
         self.actionFixer.triggered.connect(self.OnFixerSettings)
+        ##======================================================================##
         self.comboBox.currentIndexChanged.connect(self.on_combo_box_changed)
         ##======================================================================##
         self.utf8_bom.toggled.connect(self.writeSettings)
@@ -430,7 +431,26 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         """"""
         handler = RenameFiles(self)
         handler.exec()
-    
+        
+    def OnFixerSettings(self):
+        
+        dlg = FixerSettings()
+        result = dlg.exec()
+        if result == QDialog.Accepted:
+            self.FixSubtiles()
+        
+    def FixSubtiles(self):
+        
+        ext_f = MAIN_SETTINGS['key5']['fixed_subs']
+        
+        if len(MULTI_FILE) < 1 and self.single_file:
+            text = self.text_1.toPlainText()
+            fixer = CleanSubtitles(text_in=text, file_path=self.single_file, enc=self.file_enc)
+            text = fixer.FixSubtileText()
+            handler = DocumentHandler(self.single_file, text, self.file_enc, ext_f)
+            new_path = handler.write_new_file(True, False)
+            self.OpenFiles(new_path)
+            
     def SaveFile(self):
         """"""
         FileToSave = self.single_file
@@ -514,14 +534,6 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             action = QAction(basename(file_path), self)
             action.triggered.connect(partial(self.OpenFiles, file_path))
             self.recent_menu.addAction(action)
-        
-    def OnFixerSettings(self):
-        dlg = FixerSettings()
-        result = dlg.exec()
-        if result == QDialog.Accepted:
-            print("Accepted")
-        elif result == QDialog.Rejected:
-            print("Rejected")
             
     def onMergerSettings(self):
         dlg = MergerSettings(self)
