@@ -13,6 +13,7 @@ from zip_confirm import ZipStructure
 from fixer_settings import FixerSettings
 from settings_dialog import MainSettings
 from merger_settings import MergerSettings
+from merge import myMerger 
 from TextFileProc import FileHandler, DocumentHandler, ErrorsHandler, Transliteracija, normalizeText
 
 from resources.find_replace import FindReplaceDialog
@@ -22,11 +23,11 @@ from resources.renamer import RenameFiles
 from resources.FixSubtitles import SubtitleFixer
 from resources import ExportZipFile
  
-
-import sys
+import srt
 import json
 import shutil
 import linecache
+import sys
 import os
 from os.path import join, basename, normpath, exists, splitext
 from collections import deque
@@ -93,6 +94,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.actionCyrToAnsi.triggered.connect(self.CyrillicToLatin)
         self.actionCyrToUTF8.triggered.connect(self.CyrillicToLatin)
         self.actionFixer.triggered.connect(self.OnFixerSettings)
+        self.actionMerger.triggered.connect(self.MergeLines)
         ##======================================================================##
         self.comboBox.currentIndexChanged.connect(self.on_combo_box_changed)
         ##======================================================================##
@@ -283,7 +285,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             for file_item in MULTI_FILE:
                 text = normalizeText(file_item.enc, file_item.path)
                 handler = DocumentHandler(file_item.realpath, text, new_encoding, ext, cyr=self.CYR)
-                new_file_name = handler.write_new_file(multi=True, ask=False)
+                new_file_name = handler.write_new_file(multi=True, info=False, ask=False)
                 if new_file_name:
                     self.new_files.append(new_file_name)
                     handler.handleErrors(new_file_name)
@@ -316,7 +318,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             for file_item in MULTI_FILE:
                 text = normalizeText(file_encoding=file_item.enc, filepath=file_item.path)
                 handler = Transliteracija(file_item.realpath, text, new_encoding, ext)
-                new_file_name = handler.write_transliterated(multi=True, ask=False)
+                new_file_name = handler.write_transliterated(multi=True, info=False, ask=False)
                 if new_file_name:
                     handler.handleErrors(new_file_name)
                     self.setStatus(status1=basename(file_item.path), encoding="")
@@ -354,7 +356,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             for file_item in MULTI_FILE:
                 text = normalizeText(file_encoding=file_item.enc, filepath=file_item.path)
                 handler = Transliteracija(file_item.realpath, text, new_encoding, ext, reversed_action=True)
-                new_file_name = handler.write_transliterated(multi=True, ask=False)
+                new_file_name = handler.write_transliterated(multi=True, info=False, ask=False)
                 if new_file_name:
                     handler.handleErrors(new_file_name)
                     self.new_files.append(new_file_name)
@@ -449,8 +451,59 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             fixer = SubtitleFixer(text_in=text)
             text = fixer.FixSubtileText()
             handler = DocumentHandler(self.single_file, text, self.file_enc, ext_f)
-            new_path = handler.write_new_file(True, False)
-            self.OpenFiles(new_path)
+            new_file_path = handler.write_new_file(info=False, ask=False)
+            if new_file_path:
+                self.OpenFiles(new_file_path)
+                self.actionReload_file.setEnabled(True)
+        elif len(MULTI_FILE) > 1:
+            self.new_files.clear()
+            self.cyr_utf8.clear()
+            for file_item in MULTI_FILE:
+                text = normalizeText(file_item.enc, file_item.path)
+                fixer = SubtitleFixer(text_in=text, multi=True)
+                text = fixer.FixSubtileText()
+                handler = DocumentHandler(file_item.realpath, text, file_item.enc, ext_f, cyr=self.CYR)
+                new_file_name = handler.write_new_file(multi=True, info=False, ask=False)
+                if new_file_name:
+                    self.new_files.append(new_file_name)
+                    handler.handleErrors(new_file_name)
+                    self.setStatus(status1=basename(file_item.path), encoding="")
+            self.setStatus("MultiFiles done", encoding=self.file_enc)
+            self.infoMessage("\n".join([basename(x) for x in self.new_files]))            
+            
+    def MergeLines(self):
+        
+        lineLenght = MAIN_SETTINGS['key2']['l_lenght']
+        maxChar = MAIN_SETTINGS['key2']['m_char']
+        maxGap = MAIN_SETTINGS['key2']['m_gap']
+        f_suffix = MAIN_SETTINGS['key2']['f_suffix']
+
+        text = self.text_1.toPlainText()
+        subs_a = list(srt.parse(text, ignore_errors=True))
+        
+        if len(subs_a) > 0:
+            myMerger(subs_in=subs_a, max_time=lineLenght, max_char=maxChar, _gap=maxGap)
+
+            b1 = len(list(srt.parse(WORK_TEXT.getvalue(), ignore_errors=True)))
+            a1 = len(subs_a)
+
+            text = WORK_TEXT.getvalue()
+            text = srt.compose(srt.parse(text, ignore_errors=True))
+            
+            handler = DocumentHandler(self.single_file, text, self.file_enc, f_suffix, self.CYR)
+            new_file_path = handler.write_new_file(info=False, ask=False)
+            if new_file_path:
+                self.OpenFiles(new_file_path)
+                self.actionReload_file.setEnabled(True)            
+            try:
+                prf = format(((a1 - b1) / a1 * 100), '.2f')
+            except ZeroDivisionError as e:
+                logger.debug(f"Merger Error: {e}")
+            else:
+                logger.debug(f"Merger: Spojenih linija: {a1-b1}, ili {prf} %")
+                message = "<h4>Merdžer</h4>\n"
+                message += f"Spojenih linija: {a1-b1}, ili {prf} %"
+                QMessageBox.information(self, " SubtitleConverter", message, QMessageBox.Ok)                 
             
     def SaveFile(self):
         """"""
@@ -461,7 +514,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         else:
             text = self.text_1.toPlainText()
             writer = DocumentHandler(input_text=text, encoding=Enc_saved)
-            res = writer.WriteFile(text, FileToSave, True, False)
+            res = writer.WriteFile(text_in=text, file_path=FileToSave, info=False, ask=False)
             self.setStatus(basename(FileToSave), encoding=Enc_saved)
             if res:
                 self.actionSave.setEnabled(False)        
@@ -476,7 +529,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         if fileName:
             text = self.text_1.toPlainText()
             writer = DocumentHandler(encoding=Enc_saved)
-            res = writer.WriteFile(text, fileName, ask=False)
+            res = writer.WriteFile(text_in=text, file_path=fileName, ask=False)
             self.setStatus(basename(fileName), encoding=Enc_saved)
             self.update_recent_menu(fileName)
             if res:
