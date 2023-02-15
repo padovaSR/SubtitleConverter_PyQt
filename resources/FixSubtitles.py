@@ -19,8 +19,9 @@ logger = logging.getLogger(__name__)
 
 class SubtitleFixer:
     
-    def __init__(self, text_in=None):
+    def __init__(self, text_in=None, multi=False):
         self.text_in = text_in
+        self.multi = multi
         
     @staticmethod
     def rm_dash(text_in):
@@ -167,9 +168,10 @@ class SubtitleFixer:
                         m1 = ''
                     logger.debug(f'Fixer: Popravljenih gapova: {m}')
                     if m >= 0:
-                        message = "<h4>Subtitle fixer</h4>\n"
-                        message += f"Popravljenih gapova: [ {m} ]\n{m1}"
-                        QMessageBox.information(None, " SubtitleConverter", message, QMessageBox.Ok)
+                        if self.multi is False:
+                            message = "<h4>Subtitle fixer</h4>\n"
+                            message += f"Popravljenih gapova: [ {m} ]\n{m1}"
+                            QMessageBox.information(None, " SubtitleConverter", message, QMessageBox.Ok)
             return text_fixed 
                         
     @staticmethod
