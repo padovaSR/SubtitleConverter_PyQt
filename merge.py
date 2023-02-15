@@ -38,7 +38,7 @@ def myMerger(subs_in, max_time, max_char, _gap):
         subs[-1].index + 1,
         DT.timedelta(milliseconds=(mTime(subs[-1].start) + 6000)),
         DT.timedelta(milliseconds=(mTime(subs[-1].end) + 11000)),
-        'Darkstar test appliance',
+        "We have an uneven number.",
     )
     
     parni = subs[1::2]
@@ -64,8 +64,8 @@ def myMerger(subs_in, max_time, max_char, _gap):
                 else:
                     new_j.append(Subtitle(first.index, first.start, second.end, f"{first.content} {second.content}"))
             else:
-                new_j.append(Subtitle(first.index, first.start, first.end, first.content))
-                new_j.append(Subtitle(second.index, second.start, second.end, second.content))
+                new_j.append(first)
+                new_j.append(second)
 
         parni = new_j[1::2]
         neparni = new_j[0::2]
