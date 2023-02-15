@@ -687,7 +687,7 @@ class Ui_MainWindow(object):
                 "utf-8-sig",
                 "utf-8",
                 "cp852",
-                "latin2,"
+                "latin2", 
                 "ascii",
                 "utf-16",
                 "utf-16le",
