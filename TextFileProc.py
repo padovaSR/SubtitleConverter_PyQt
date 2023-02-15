@@ -235,10 +235,10 @@ class DocumentHandler:
         self.presuffix = presuffix
         self.cyr = cyr
 
-    def write_new_file(self, multi=False, ask=True):
+    def write_new_file(self, multi=False, info=True, ask=True):
         new_name=self.newName()
         text=self.rplStr(self.input_text)
-        if self.WriteFile(text_in=text, file_path=new_name, multi=multi, ask=ask):
+        if self.WriteFile(text_in=text, file_path=new_name, multi=multi, info=info, ask=ask):
             return new_name
 
     def rplStr(self, in_text):
@@ -364,7 +364,7 @@ class DocumentHandler:
             name1 = f"{bname}.cyr_{pre_ext.strip('.')}"
         return normpath(join(dirname(file_path), f"{name1}{fsuffix}"))   ## Full path
 
-    def WriteFile(self, text_in, file_path, multi=False, ask=True):
+    def WriteFile(self, text_in, file_path, multi=False, info=True, ask=True):
         if self.encoding in codelist:
             error = 'surrogatepass'
         else:
@@ -380,7 +380,7 @@ class DocumentHandler:
         try:
             with open(file_path, 'w', encoding=self.encoding, errors=error, newline='\r\n') as n_file:
                 n_file.write(text_in)
-                if multi is False:
+                if info is True:
                     self.messageInformation(file_path)
                 return True
             logger.debug(f"Write: {file_path}: {self.encoding}")
@@ -502,7 +502,7 @@ class Transliteracija(DocumentHandler):
         self.reversed_action = reversed_action
         self.cyr = cyr
 
-    def write_utf8_file(self, multi=False, ask=False):
+    def write_utf8_file(self, multi=False, info=False, ask=False):
         """"""
         self.presuffix = MAIN_SETTINGS["key5"]['cyr_utf8_txt']
         bom = MAIN_SETTINGS["Preferences"]["bom_utf8"]
@@ -512,14 +512,14 @@ class Transliteracija(DocumentHandler):
             self.encoding = "utf-8-sig"
         new_name = self.newName()
         text = self.changeLetters()
-        if self.WriteFile(text_in=text, file_path=new_name, multi=True, ask=False):
+        if self.WriteFile(text_in=text, file_path=new_name, multi=multi, info=info, ask=ask):
             return new_name
 
-    def write_transliterated(self, multi=False, ask=True):
+    def write_transliterated(self, multi=False, info=True, ask=True):
         """"""
         new_name = self.newName()
         text = self.changeLetters()
-        if self.WriteFile(text_in=text, file_path=new_name, multi=multi, ask=ask):
+        if self.WriteFile(text_in=text, file_path=new_name, multi=multi, info=info, ask=ask):
             return new_name
 
     def changeLetters(self):
