@@ -687,7 +687,7 @@ class Ui_MainWindow(object):
                 "utf-8-sig",
                 "utf-8",
                 "cp852",
-                "latin2"
+                "latin2,"
                 "ascii",
                 "utf-16",
                 "utf-16le",
@@ -700,7 +700,7 @@ class Ui_MainWindow(object):
         )
         # self.comboBox.setCurrentIndex(0)
         self.comboBox.setCurrentText(MAIN_SETTINGS["CB_value"].strip())
-        self.comboBox.setMaxVisibleItems(17)
+        self.comboBox.setMaxVisibleItems(18)
         self.comboBox.setToolTip(u"Kodiranja")
         
         self.toolBar.addWidget(self.comboBox)
