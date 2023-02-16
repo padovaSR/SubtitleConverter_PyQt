@@ -6,6 +6,7 @@ sys.path.append("../")
 
 from settings import MAIN_SETTINGS, WORK_TEXT
 from merge import ShrinkGap, FixSubGaps
+from resources.DictHandle import Dictionaries 
 
 import srt
 import re
@@ -51,25 +52,24 @@ class SubtitleFixer:
         ct_r = re.compile(r"</*font.*?>", re.I)
         sp_n = 0
 
-        def remSel(text_in, rep, reple):
-            s1 = rep.sub(reple, text_in)
-            return s1
-
-        text = remSel(text_in, _space_r, '')
+        def apply_regex(text_in, RP, replace_with):
+            return RP.sub(replace_with, text_in)
+            
+        text = apply_regex(text_in, _space_r, '')
 
         if cb4_s is True:
-            text = remSel(text, for_rpls, '')
+            text = apply_regex(text, for_rpls, '')
 
         if cb6_s is True:
-            text = remSel(text, spaceS_r, ' ')
-            text = remSel(text, pe_r, "")
+            text = apply_regex(text, spaceS_r, ' ')
+            text = apply_regex(text, pe_r, "")
 
         if cb5_s is True:
-            text = remSel(text, cs_r, '-')
+            text = apply_regex(text, cs_r, '-')
         elif cb5_s is False:
             sp_n = text.count('- ')
             if sp_n >= 3:
-                text = remSel(text, cs_r, '-')
+                text = apply_regex(text, cs_r, '-')
 
         if cb7_s is True:
             subs = list(srt.parse(text, ignore_errors=True))
@@ -104,7 +104,7 @@ class SubtitleFixer:
                     logger.debug('Fixer: No subtitles found!')
 
         if cb3_s is True:
-            text = remSel(text, ct_r, "")
+            text = apply_regex(text, ct_r, "")
 
         if cb_nl is True:
             subs = list(srt.parse(text, ignore_errors=True))
@@ -119,10 +119,24 @@ class SubtitleFixer:
         if cb8_s is True:
             if not cb1_s:
                 try:
-                    text = remSel(text, reg_0, "00:00:00,000 --> 00:00:00,000")
+                    text = apply_regex(text, reg_0, "00:00:00,000 --> 00:00:00,000")
                 except Exception as e:
                     logger.debug(f'Fixer: {e}')
         return text
+    
+    @staticmethod
+    def doReplace(text_in):
+        dict_handler = Dictionaries()
+        searchReplc = dict_handler.searchReplc
+        robj_r = re.compile("(%s)" % "|".join(map(re.escape, searchReplc.keys())))
+        try:
+            t_out = robj_r.subn(lambda m: searchReplc[m.group(0)], text_in)
+        except (IOError, AttributeError, UnicodeDecodeError, Exception) as e:
+            logger.debug(f"DoReplace, error: {e}")
+        else:
+            much = t_out[1]
+            logger.debug(f'DoReplace, zamenjeno [{much}] objekata')
+            return much, t_out[0]    
     
     def FixSubtileText(self):
         
