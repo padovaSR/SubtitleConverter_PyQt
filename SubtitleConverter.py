@@ -3,7 +3,7 @@
 
 from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, QDialog, QFontDialog, QColorDialog, QMessageBox, QAction
 from PySide2.QtGui import QFont, QTextCursor
-from PySide2.QtCore import Qt, QFileInfo, QDir, QEventLoop, QTimer, QFileSystemWatcher
+from PySide2.QtCore import Qt, QFileInfo, QDir, QEventLoop, QTimer
 
 from sc_gui import Ui_MainWindow
 from settings import MAIN_SETTINGS, MULTI_FILE, WORK_TEXT, main_settings_file, log_file_history, printEncoding, updateRecentFiles
@@ -61,9 +61,6 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         updateRecentFiles(self.recent_files)
         self.update_recent_menu()
         
-        self.watcher = QFileSystemWatcher()
-        self.watcher.fileChanged.connect(self.file_changed)        
-        
         self.actionOpen.triggered.connect(self.onOpen)
         self.actionOpen_multiple.triggered.connect(self.onOpenMultiple)
         self.actionSave.triggered.connect(self.SaveFile)
@@ -98,6 +95,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.actionCyrToAnsi.triggered.connect(self.CyrillicToLatin)
         self.actionCyrToUTF8.triggered.connect(self.CyrillicToLatin)
         self.actionTranscribe.triggered.connect(self.onTranscribe)
+        self.actionCleanup.triggered.connect(self.onCleanup)
         self.actionFixer.triggered.connect(self.OnFixerSettings)
         self.actionMerger.triggered.connect(self.MergeLines)
         ##======================================================================##
@@ -212,7 +210,6 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                 self.single_file=handler.real_path
                 self.file_enc = handler.file_encoding
                 self.status_2.setText(f"<b>{printEncoding(handler.file_encoding)}</b> ")
-                self.watcher.addPath(self.single_file)
                 # Add the file to the list of recently opened files
                 if exists(real_path):
                     self.update_recent_menu(real_path)                
@@ -511,7 +508,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                 message += f"Spojenih linija: {a1-b1}, ili {prf} %"
                 QMessageBox.information(self, " SubtitleConverter", message, QMessageBox.Ok)
                 
-    def onTranscribe(self, event):
+    def onTranscribe(self):
 
         ext = MAIN_SETTINGS['key5']['transcribe']
             
@@ -535,7 +532,45 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             if new_file_path:
                 handler.handleErrors(new_file_path)
                 self.OpenFiles(new_file_path)
-                self.actionReload_file.setEnabled(True)            
+                self.actionReload_file.setEnabled(True)
+                
+    def onCleanup(self):
+
+        ext =  MAIN_SETTINGS['key5']['cleanup']
+
+        text = self.text_1.toPlainText()
+            
+        try:
+            subs = list(srt.parse(text, ignore_errors=True))
+            NUM1 = len(subs)
+            subs = srt.compose(subs)
+            
+            cleaner = SubtitleFixer()
+            
+            text = cleaner.cleanUp(subs)
+
+            N2, text_s = cleaner.cleanLine(text)
+            
+            text = cleaner.cleanUp(text_s)
+            
+            D2, text_s = cleaner.cleanLine(text)            
+
+            writer = DocumentHandler(self.single_file, text_s, self.file_enc, ext, self.CYR)
+            new_file_path = writer.write_new_file(info=False, ask=False)
+            logger.debug(f"CleanUp _1: {sys.exc_info()}")
+            if D2 ==0 and N2 == 0:
+                message = "Subtitle clean\nno changes made."
+                QMessageBox.information(self, " SubtitleConverter", message, QMessageBox.Ok)
+            else:
+                if D2 == 0 and N2 > 0: D2 = N2
+                message = f"Subtitles deleted: [{NUM1-D2} ]"
+                QMessageBox.information(self, " SubtitleConverter", message, QMessageBox.Ok)
+            if new_file_path:
+                self.OpenFiles(new_file_path)
+                self.actionReload_file.setEnabled(True)
+        except Exception as e:
+            logger.debug(f"Cleanup: {e}")
+            return                
             
     def SaveFile(self):
         """"""
@@ -549,8 +584,8 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             res = writer.WriteFile(text_in=text, file_path=FileToSave, info=False, ask=False)
             self.setStatus(basename(FileToSave), encoding=Enc_saved)
             if res:
-                self.actionSave.setEnabled(False)        
-        
+                self.actionSave.setEnabled(False)
+                
     def SaveAs(self):
         """"""
         FileToSave = self.single_file or "Untitled.txt"
@@ -566,19 +601,6 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             self.update_recent_menu(fileName)
             if res:
                 self.actionSave_as.setEnabled(False)
-                
-    def file_changed(self):
-        response = QMessageBox.question(
-            self,
-            "File changed",
-            "The file has changed. Do you want to reload it?",
-            QMessageBox.Yes | QMessageBox.No,
-        )
-        if response == QMessageBox.Yes:
-            with open(self.single_file, "r", encoding=self.file_enc) as f:
-                self.text_edit.setPlainText(f.read())            
-        else:
-            self.watcher.removePath(self.single_file)
                 
     def CloseFile(self):
         """"""
