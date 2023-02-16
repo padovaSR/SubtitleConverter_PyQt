@@ -175,6 +175,123 @@ class SubtitleFixer:
             return text_fixed 
                         
     @staticmethod
+    def cleanUp(text_in):
+    
+        # okrugle zagrade                     '(\([^\)]*\))'
+        # kockaste zagrade                    '(\[[^]]*\])'
+        # vitičaste zagrade                   '(\{[^}]*\})'
+        # crtice na početku prazne linije     '^\s*?\-+\s*?(?<=$)'
+        # Tačka na kraju, prazna linija       '(^\s*?\.+)$'
+        # Zarez na kraju, prazna linija       '(^\s*?,+)$'
+        # Tačka zarez na kraju, prazna linija '(^\s*?;+)$'
+        # Spejs na kraju linije         '(\s*?)$'
+        # Uzvičnici                     '(^\s*?!+\s*?)$'
+        # Znak pitanja                  '(^\s*?\?+\s*?)$'
+        # Prva prazna linija            '(?<=,\d\d\d)\n\n(?=\w)'
+        # '(?<=,\d\d\d)\n\n(?=\s*\S*?)'
+        # reg-4 = re.compile(r'((?!\n)([A-Z\s]*){1,3}(?=\:)(?<![0-9a-z])\:\s)')
+        reg_4 = re.compile(
+            r"^\s*\-\.+\s+|(([A-Z ]*){1,3}(?=\:)(?<![0-9a-z])\:\s)|^[ \t]*", re.M
+        )
+        reg_P6 = re.compile(
+            r"(\([^\)]*\))|(\[[^]]*\])|(\{[^}]*\})|(<i>\s*<\/i>)|^\s*?\-+\s*?(?<=$)", re.M
+        )
+        reg4n = re.compile(r'([A-Z ]*) [0-3](?=\:)')  # MAN 1: broj 1-3
+        reg_P8 = re.compile(
+            r"(\s*?)$|(^\s*?\.+)$|(^\s*?,+)$|(^\s*?;+)$|(^\s*?!+\s*?)$|(^\s*?\?+\s*?)$",
+            re.M,
+        )
+        reg_S9 = re.compile("(?<=,\d\d\d)\n\n(?=\w)|(?<=,\d\d\d)\n\n(?=\s*\S*?)", re.M)
+        reg8a = re.compile(
+            r'^\s*(?<=.)|^-(?<=$)', re.M
+        )  # Spejs na pocetku linije, i crtica na početku prazne linije
+        regN = re.compile(r'(?<=^-)\:\s*', re.M)  # dve tacke iza crtice
+        regColon = re.compile(r"^\s*: *", re.M)
+        RL = re.compile(
+            r"\d+\n\d{2}:\d{2}:\d{2},\d{3} --> \d{2}:\d{2}:\d{2},\d{3}(?=\n\s*\d+\n*?)"
+        )
+        r_dash = re.compile(r"^\s*- *-*\s*$", re.M)
+        # def opFile(in_text):
+        # return in_text.replace(']:', ']').replace('):', ')').replace('}:', '}').replace('  ', ' ')
+        
+        textis = srt.parse(text_in, ignore_errors=True)
+        text_subs = srt.compose(textis)
+    
+        try:
+            fp3 = reg_4.sub("", text_subs)
+    
+            fp5 = reg_P6.sub("", fp3)
+    
+            # rf1 = opFile(fp5)
+            rf1 = regColon.sub("", fp5)
+    
+            fp11 = reg_P8.sub("", rf1)
+            fp13 = reg_S9.sub("\n", fp11)
+            fp13 = RL.sub("\n", fp13)
+            fp14 = regN.sub('', fp13)
+            fp14a = r_dash.sub('', fp14)
+            fp15 = reg8a.sub('', fp14a)
+    
+            return fp15
+    
+        except Exception as e:
+            logger.debug(f"CleanSubtitle proc, unexpected error: {e}")
+    
+    @staticmethod
+    def cleanLine(text_in):
+        """"""
+        try:
+            subs = list(srt.parse(text_in, ignore_errors=True))
+            if len(subs) > 0:
+                # Trim white spaces
+                text_stripped = []
+                for i in range(len(subs)):
+                    orig_text = subs[i].content
+                    stripped_text = subs[i].content.strip()
+                    if orig_text != stripped_text:
+                        text_stripped.append(subs[i].index)
+                        subs[i].content = subs[i].content.strip()
+    
+                # Find the list index of the empty lines. This is different than the srt index!
+                # The list index starts from 0, but the srt index starts from 1.
+                count = 0
+                to_delete = []
+                for sub in subs:
+                    if not sub.content:
+                        to_delete.append(count)
+                    count = count + 1
+    
+                to_delete.sort(reverse=True)
+    
+                # Delete the empty/blank subtitles
+                for i in to_delete:
+                    del subs[i]
+    
+                # Fix Index and trim white spaces
+                for i in range(len(subs)):
+                    subs[i].index = i + 1
+    
+                if not text_stripped and not to_delete:
+                    logger.debug("CleanLine, Subtitle clean. No changes made.")
+                    return 0, srt.compose(subs)
+    
+                else:
+                    logger.debug(
+                        "Index of subtitles deleted: {0}".format([i + 1 for i in to_delete])
+                    )
+                    logger.debug("Index of subtitles trimmed: {0}".format(text_stripped))
+                    logger.debug(
+                        '{0} deleted, {1} trimmed'.format(
+                            len(to_delete), len(text_stripped)
+                        )
+                    )
+                    return len(subs), srt.compose(subs)
+            else:
+                logger.debug('No subtitles found.')
+        except Exception as e:
+            logger.debug(f"CleanSubtitle_CL, unexpected error: {e}")
+            
+    @staticmethod
     def poravnLine(intext):
         
         def proCent(percent, whole):
