@@ -96,6 +96,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.actionCyrToUTF8.triggered.connect(self.CyrillicToLatin)
         self.actionTranscribe.triggered.connect(self.onTranscribe)
         self.actionCleanup.triggered.connect(self.onCleanup)
+        self.actionSpecReplace.triggered.connect(self.onRepSpecial)
         self.actionFixer.triggered.connect(self.OnFixerSettings)
         self.actionMerger.triggered.connect(self.MergeLines)
         ##======================================================================##
@@ -558,19 +559,39 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             writer = DocumentHandler(self.single_file, text_s, self.file_enc, ext, self.CYR)
             new_file_path = writer.write_new_file(info=False, ask=False)
             logger.debug(f"CleanUp _1: {sys.exc_info()}")
-            if D2 ==0 and N2 == 0:
-                message = "Subtitle clean\nno changes made."
-                QMessageBox.information(self, " SubtitleConverter", message, QMessageBox.Ok)
-            else:
-                if D2 == 0 and N2 > 0: D2 = N2
-                message = f"Subtitles deleted: [{NUM1-D2} ]"
-                QMessageBox.information(self, " SubtitleConverter", message, QMessageBox.Ok)
+            
             if new_file_path:
+                if D2 ==0 and N2 == 0:
+                    message = "Subtitle clean\nno changes made."
+                    QMessageBox.information(self, " SubtitleConverter", message, QMessageBox.Ok)
+                else:
+                    if D2 == 0 and N2 > 0: D2 = N2
+                    message = f"Subtitles deleted: [{NUM1-D2} ]"
+                    QMessageBox.information(self, " SubtitleConverter", message, QMessageBox.Ok)                
                 self.OpenFiles(new_file_path)
                 self.actionReload_file.setEnabled(True)
         except Exception as e:
             logger.debug(f"Cleanup: {e}")
-            return                
+            return
+        
+    def onRepSpecial(self):
+        
+        ext = splitext(splitext(self.single_file)[0])[1].strip(".")
+        text = self.text_1.toPlainText()
+        try:
+            handler = SubtitleFixer()
+            num, text_o = handler.doReplace(text)
+            
+            writer = DocumentHandler(self.single_file, text_o, self.file_enc, ext, self.CYR)
+            new_file_path = writer.write_new_file(multi=False, info=False, ask=False)
+            if new_file_path:
+                self.OpenFiles(new_file_path)
+                # self.actionReload_file.setEnabled(True)            
+                message = f"Zamenjenih objekata\nukupno [ {num} ]"
+                QMessageBox.information(self, " SubtitleConverter", message, QMessageBox.Ok)
+        except Exception as e:
+            logger.debug(f"ReplaceSpecial Error: {e}")
+            return
             
     def SaveFile(self):
         """"""
