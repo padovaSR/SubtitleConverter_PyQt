@@ -1,4 +1,4 @@
-Aaliyah=>Alija
+﻿Aaliyah=>Alija
 Aaron=>Aron
 Abbey=>Abi
 Abbie=>Abi
@@ -840,5 +840,3 @@ Zoe=>Zoi
 Zoey=>Zoi
 hurricane=>uragan
 Sonny=>Sani
-this=>ovo
-a job=>posao
