@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 #
 
-from resources.DictHandle import Dictionaries, lat_cir_mapa
+from resources.DictHandle import Dictionaries
 from settings import MAIN_SETTINGS, MULTI_FILE
 from ChoiceDialog import MultiChoiceDialog
 
@@ -235,9 +235,10 @@ class DocumentHandler:
         self.presuffix = presuffix
         self.cyr = cyr
 
-    def write_new_file(self, multi=False, info=True, ask=True):
+    def write_new_file(self, multi=False, text=None, info=True, ask=True):
         new_name=self.newName()
-        text=self.rplStr(self.input_text)
+        if not text:
+            text=self.rplStr(self.input_text)
         if self.WriteFile(text_in=text, file_path=new_name, multi=multi, info=info, ask=ask):
             return new_name
 
@@ -394,7 +395,70 @@ class DocumentHandler:
         message = "<h4>Fajl je uspešno sačuvan</h4>\n"
         message += f"{basename(path)}"
         QMessageBox.information(None, " SubtitleConverter", message, QMessageBox.Ok)
-
+        
+    @staticmethod
+    def zameniImena(text_in):
+    
+        if len(list(srt.parse(text_in))) == 0:
+            logger.debug(f"Transkrib, No subtitles found.")
+        else:
+            text_in = srt.compose(srt.parse(text_in, ignore_errors=True))
+            
+        dict_handler = Dictionaries()
+        dictionary_0 = dict_handler.dictionary_0
+        dictionary_1 = dict_handler.dictionary_1
+        dictionary_2 = dict_handler.dictionary_2
+        dict0_n = dict_handler.dict0_n
+        dict1_n = dict_handler.dict1_n
+        dict2_n = dict_handler.dict2_n
+        dict0_n2 = dict_handler.dict0_n2
+        dict1_n2 = dict_handler.dict1_n2
+        dict2_n2 = dict_handler.dict2_n2
+    
+        robj1 = re.compile(r'\b(' + '|'.join(map(re.escape, dictionary_1.keys())) + r')\b')
+        robj2 = re.compile(r'\b(' + '|'.join(map(re.escape, dictionary_2.keys())) + r')\b')
+        robj3 = re.compile(r'\b(' + '|'.join(map(re.escape, dictionary_0.keys())) + r')\b')
+    
+        robjN1 = re.compile(r'\b(' + '|'.join(map(re.escape, dict1_n.keys())) + r')\b')
+        robjN2 = re.compile(r'\b(' + '|'.join(map(re.escape, dict2_n.keys())) + r')\b')
+        robjN0 = re.compile(r'\b(' + '|'.join(map(re.escape, dict0_n.keys())) + r')\b')
+    
+        robjL0 = re.compile(r'\b(' + '|'.join(map(re.escape, dict0_n2.keys())) + r')\b')
+        robjL1 = re.compile(r'\b(' + '|'.join(map(re.escape, dict1_n2.keys())) + r')\b')
+        robjL2 = re.compile(r'\b(' + '|'.join(map(re.escape, dict2_n2.keys())) + r')\b')
+        try:
+            t_out1 = robj1.subn(lambda x: dictionary_1[x.group(0)], text_in)
+            t_out2 = robj2.subn(lambda x: dictionary_2[x.group(0)], t_out1[0])
+            t_out3 = robj3.subn(lambda x: dictionary_0[x.group(0)], t_out2[0])
+    
+            t_out4 = robjN1.subn(lambda x: dict1_n[x.group(0)], t_out3[0])
+            t_out5 = robjN2.subn(lambda x: dict2_n[x.group(0)], t_out4[0])
+            t_out6 = robjN0.subn(lambda x: dict0_n[x.group(0)], t_out5[0])
+        except Exception as e:
+            logger.debug(F"Transkripcija, error: {e}")
+    
+        def doRepl(inobj, indict, text):
+            try:
+                out = inobj.subn(lambda x: indict[x.group(0)], text)
+                return out[1]
+            except IOError as e:
+                logger.debug(f"Replace keys, I/O error: {e}")
+            except Exception as e:
+                logger.debug(f"Replace keys, unexpected error: {e}")
+    
+        if len(dict1_n2) != 0:
+            doRepl(robjL1, dict1_n2, t_out6[0])
+        if len(dict2_n2) != 0:
+            doRepl(robjL2, dict2_n2, t_out6[0])
+        if len(dict0_n2) != 0:
+            doRepl(robjL0, dict0_n2, t_out6[0])
+    
+        much = t_out1[1] + t_out2[1] + t_out3[1] + t_out4[1] + t_out5[1] + t_out6[1]
+        logger.debug('Transkripcija u toku.\n--------------------------------------')
+        logger.debug(f'Zamenjeno ukupno {much} imena i pojmova')
+    
+        return much, t_out6[0]
+    
 class ErrorsHandler:
 
     def __init__(self, input_text=None, input_file=None, encoding=None):
