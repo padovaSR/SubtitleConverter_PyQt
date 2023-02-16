@@ -1,4 +1,4 @@
-Address=>Adresa
+﻿Address=>Adresa
 address=>adresa
 Agent=>agent
 agent=>agent
@@ -34,3 +34,8 @@ ten=>deset
 quarterback=>kvoterbek
 coffe=>kafa
 I'm sorry=>Žao mi je
+What=>Šta
+what=>šta
+this=>ovo
+a job=>posao
+good=>dobro
