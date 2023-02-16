@@ -539,7 +539,6 @@ class MainWindow(Ui_MainWindow, QMainWindow):
     def onCleanup(self):
 
         ext =  MAIN_SETTINGS['key5']['cleanup']
-
         text = self.text_1.toPlainText()
             
         try:
@@ -577,11 +576,12 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         
     def onRepSpecial(self):
         
-        ext = splitext(splitext(self.single_file)[0])[1].strip(".")
-        if re.search("x264|ION10", ext) or len(ext) > 6:
-            ext= ""        
+        
         text = self.text_1.toPlainText()
         try:
+            ext = splitext(splitext(self.single_file)[0])[1].strip(".")
+            if re.search("x264|ION10", ext) or len(ext) > 6:
+                ext= ""            
             handler = SubtitleFixer()
             num, text_o = handler.doReplace(text)
             
@@ -630,6 +630,9 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         """"""
         self.text_1.setPlainText("")
         self.text_1.toPlainText()
+        self.single_file = None
+        self.actionSave.setEnabled(False)
+        self.actionSave_as.setEnabled(False)        
         self.setStatus("SubtitleConverter is ready", encoding="")
                 
     def documentWasModified(self):
