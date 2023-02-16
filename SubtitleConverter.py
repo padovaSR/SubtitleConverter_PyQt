@@ -607,7 +607,6 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.text_1.setPlainText("")
         self.text_1.toPlainText()
         self.setStatus("SubtitleConverter is ready", encoding="")
-        self.watcher.removePath(self.single_file)
                 
     def documentWasModified(self):
         self.actionSave.setEnabled(True)
