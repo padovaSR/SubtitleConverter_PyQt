@@ -3,7 +3,7 @@
 
 from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, QDialog, QFontDialog, QColorDialog, QMessageBox, QAction
 from PySide2.QtGui import QFont, QTextCursor
-from PySide2.QtCore import Qt, QFileInfo, QDir, QEventLoop, QTimer
+from PySide2.QtCore import Qt, QFileInfo, QDir, QEventLoop, QTimer, QFileSystemWatcher
 
 from sc_gui import Ui_MainWindow
 from settings import MAIN_SETTINGS, MULTI_FILE, WORK_TEXT, main_settings_file, log_file_history, printEncoding, updateRecentFiles
@@ -61,6 +61,9 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         updateRecentFiles(self.recent_files)
         self.update_recent_menu()
         
+        self.watcher = QFileSystemWatcher()
+        self.watcher.fileChanged.connect(self.file_changed)        
+        
         self.actionOpen.triggered.connect(self.onOpen)
         self.actionOpen_multiple.triggered.connect(self.onOpenMultiple)
         self.actionSave.triggered.connect(self.SaveFile)
@@ -68,6 +71,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.actionReload_file.triggered.connect(self.ReloadFile)
         self.actionExport_ZIP.triggered.connect(self.exportZIP)
         self.actionRenameFiles.triggered.connect(self.RenameFiles)
+        self.actionClose.triggered.connect(self.CloseFile)
         self.actionQuit.triggered.connect(self.onQuit)
         ##======================================================================##
         self.actionFont.triggered.connect(self.fontDialog)
@@ -93,6 +97,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.actionCYR.triggered.connect(self.LatinToCyrillic)
         self.actionCyrToAnsi.triggered.connect(self.CyrillicToLatin)
         self.actionCyrToUTF8.triggered.connect(self.CyrillicToLatin)
+        self.actionTranscribe.triggered.connect(self.onTranscribe)
         self.actionFixer.triggered.connect(self.OnFixerSettings)
         self.actionMerger.triggered.connect(self.MergeLines)
         ##======================================================================##
@@ -207,6 +212,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                 self.single_file=handler.real_path
                 self.file_enc = handler.file_encoding
                 self.status_2.setText(f"<b>{printEncoding(handler.file_encoding)}</b> ")
+                self.watcher.addPath(self.single_file)
                 # Add the file to the list of recently opened files
                 if exists(real_path):
                     self.update_recent_menu(real_path)                
@@ -503,7 +509,33 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                 logger.debug(f"Merger: Spojenih linija: {a1-b1}, ili {prf} %")
                 message = "<h4>Merdžer</h4>\n"
                 message += f"Spojenih linija: {a1-b1}, ili {prf} %"
-                QMessageBox.information(self, " SubtitleConverter", message, QMessageBox.Ok)                 
+                QMessageBox.information(self, " SubtitleConverter", message, QMessageBox.Ok)
+                
+    def onTranscribe(self, event):
+
+        ext = MAIN_SETTINGS['key5']['transcribe']
+            
+        if self.utf8_bom.isChecked():
+            new_encoding="utf-8-sig"
+        else:
+            new_encoding = "utf-8"
+
+        if len(MULTI_FILE) < 1 and self.single_file:
+            text = self.text_1.toPlainText()
+            
+            handler = DocumentHandler(self.single_file, text, new_encoding, ext, cyr=self.CYR)
+            text = handler.rplStr(text)
+            num, text = handler.zameniImena(text)
+            
+            if num > 28 or (num < 28 and num > 2):
+                message = f"Zamenjenih objekata\nukupno [ {num} ]"
+                QMessageBox.information(self, " SubtitleConverter", message, QMessageBox.Ok)                
+    
+            new_file_path = handler.write_new_file(text=text, info=False, ask=False)
+            if new_file_path:
+                handler.handleErrors(new_file_path)
+                self.OpenFiles(new_file_path)
+                self.actionReload_file.setEnabled(True)            
             
     def SaveFile(self):
         """"""
@@ -534,6 +566,26 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             self.update_recent_menu(fileName)
             if res:
                 self.actionSave_as.setEnabled(False)
+                
+    def file_changed(self):
+        response = QMessageBox.question(
+            self,
+            "File changed",
+            "The file has changed. Do you want to reload it?",
+            QMessageBox.Yes | QMessageBox.No,
+        )
+        if response == QMessageBox.Yes:
+            with open(self.single_file, "r", encoding=self.file_enc) as f:
+                self.text_edit.setPlainText(f.read())            
+        else:
+            self.watcher.removePath(self.single_file)
+                
+    def CloseFile(self):
+        """"""
+        self.text_1.setPlainText("")
+        self.text_1.toPlainText()
+        self.setStatus("SubtitleConverter is ready", encoding="")
+        self.watcher.removePath(self.single_file)
                 
     def documentWasModified(self):
         self.actionSave.setEnabled(True)
@@ -637,7 +689,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         else:
             message = "<h3><font color='#55aaff'>Ništa nije selektovano?</h3></font>"
             message += "\nSelektujte tekst za formatiranje"
-            msg = QMessageBox.information(self, "Formatiranje teksta", message, QMessageBox.Ok)
+            QMessageBox.information(self, "Formatiranje teksta", message, QMessageBox.Ok)
     
     def formatColor(self):
         """Sets the color formatting of the selected text."""
