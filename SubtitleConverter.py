@@ -24,6 +24,7 @@ from resources.FixSubtitles import SubtitleFixer
 from resources import ExportZipFile
  
 import srt
+import re
 import json
 import shutil
 import linecache
@@ -577,6 +578,8 @@ class MainWindow(Ui_MainWindow, QMainWindow):
     def onRepSpecial(self):
         
         ext = splitext(splitext(self.single_file)[0])[1].strip(".")
+        if re.search("x264|ION10", ext) or len(ext) > 6:
+            ext= ""        
         text = self.text_1.toPlainText()
         try:
             handler = SubtitleFixer()
