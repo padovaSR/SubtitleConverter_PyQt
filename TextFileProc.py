@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 #
 
-from resources.DictHandle import Dictionaries
+from resources.DictHandle import Dictionaries, lat_cir_mapa
 from settings import MAIN_SETTINGS, MULTI_FILE
 from ChoiceDialog import MultiChoiceDialog
 
