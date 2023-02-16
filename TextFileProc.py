@@ -241,8 +241,9 @@ class DocumentHandler:
             text=self.rplStr(self.input_text)
         if self.WriteFile(text_in=text, file_path=new_name, multi=multi, info=info, ask=ask):
             return new_name
-
-    def rplStr(self, in_text):
+    
+    @staticmethod
+    def rplStr(in_text):
 
         try:
             p = in_text.encode(encoding="utf-8", errors="surrogatepass")
