@@ -67,6 +67,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.actionSave.triggered.connect(self.SaveFile)
         self.actionSave_as.triggered.connect(self.SaveAs)
         self.actionReload_file.triggered.connect(self.ReloadFile)
+        self.actionReturn.triggered.connect(self.openPrevious)
         self.actionExport_ZIP.triggered.connect(self.exportZIP)
         self.actionRenameFiles.triggered.connect(self.RenameFiles)
         self.actionClose.triggered.connect(self.CloseFile)
@@ -205,7 +206,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             self.text_1.setPlainText(text)
             self.CYR = (
                 handler.file_encoding in ("windows-1251", "utf-8", "utf-8-sig")
-            ) and checkCyrillicAlphabet(text)
+            ) and checkCyrillicAlphabet(text) > 60
             if handler.real_path:
                 real_path = handler.real_path
                 self.status_1.setText(f"{basename(real_path)}")
@@ -220,6 +221,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                 self.highlight_errors(text)
                 self.actionSave.setEnabled(False)
                 self.actionSave_as.setEnabled(False)
+                self.actionReload_file.setEnabled(True)
             if len(MULTI_FILE) > 1:
                 self.displayFiles(MULTI_FILE)
                 self.status_2.clear()
@@ -250,11 +252,13 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             cursor.setPosition(end, QTextCursor.KeepAnchor)
             self.text_1.setTextCursor(cursor)
             loop = QEventLoop()
-            if len(surrogates_start) < 35:
-                QTimer.singleShot(400, loop.quit)
+            if len(surrogates_start) < 45:
+                QTimer.singleShot(350, loop.quit)
+            elif len(surrogates_start) > 1000:
+                loop.quit()
             else:
-                QTimer.singleShot(15, loop.quit)
-            loop.exec_()            
+                QTimer.singleShot(10, loop.quit)
+            loop.exec_()
             
     def changeEncoding(self):
         """"""
@@ -283,7 +287,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             if new_file_name:
                 handler.handleErrors(new_file_name)
                 self.OpenFiles(new_file_name)
-                self.actionReload_file.setEnabled(True)
+                self.actionReturn.setEnabled(True)
         elif len(MULTI_FILE) > 1:
             self.new_files.clear()
             self.cyr_utf8.clear()
@@ -313,7 +317,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             if new_file_name:
                 handler.handleErrors(new_file_name)
                 self.OpenFiles(new_file_name)
-                self.actionReload_file.setEnabled(True)
+                self.actionReturn.setEnabled(True)
                 self.CYR = True
             new_utf8_file = handler.write_utf8_file()
             self.cyr_utf8.append(new_utf8_file)
@@ -355,7 +359,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             if new_file_name:
                 handler.handleErrors(new_file_name)
                 self.OpenFiles(new_file_name)
-                self.actionReload_file.setEnabled(True)
+                self.actionReturn.setEnabled(True)
         elif len(MULTI_FILE) > 1:
             self.new_files.clear()
             for file_item in MULTI_FILE:
@@ -580,7 +584,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         text = self.text_1.toPlainText()
         try:
             ext = splitext(splitext(self.single_file)[0])[1].strip(".")
-            if re.search("x264|ION10", ext) or len(ext) > 6:
+            if re.search("(x|h)\.?264|ION(10|265)|\d{3,4}", ext, re.I) or len(ext) > 6:
                 ext= ""            
             handler = SubtitleFixer()
             num, text_o = handler.doReplace(text)
@@ -642,9 +646,13 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         
     def ReloadFile(self):
         """"""
-        PreviousFile = self.recent_files[1]
-        self.OpenFiles(PreviousFile)
-        self.actionReload_file.setEnabled(False)
+        self.OpenFiles(self.single_file)
+        
+    def openPrevious(self):
+        """"""
+        previous_file = self.recent_files[1]
+        self.OpenFiles(previous_file)
+        self.actionReturn.setEnabled(False)
         
     def findReplace(self):
         find_replace_dialog = FindReplaceDialog(text_edit=self.text_1)
