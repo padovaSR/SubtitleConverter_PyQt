@@ -97,6 +97,7 @@ class Ui_MainWindow(object):
         icon5.addFile(join(I_PATH,"close.png"), QSize(), QIcon.Normal, QIcon.Off)
         self.actionClose.setIcon(icon5)
         self.actionClose.setFont(font)
+        
         self.actionReload_file = QAction(MainWindow)
         self.actionReload_file.setObjectName(u"actionReload_file")
         
@@ -112,6 +113,13 @@ class Ui_MainWindow(object):
         self.actionReload_file.setFont(font)
         self.actionQuit = QAction(MainWindow)
         self.actionQuit.setObjectName(u"actionQuit")
+        
+        self.actionReturn = QAction(MainWindow)
+        self.actionReturn.setObjectName("actionReturn")
+        icon_b = QIcon()
+        icon_b.addFile(join(I_PATH, "return.png"), QSize(), QIcon.Normal, QIcon.Off)
+        self.actionReturn.setIcon(icon_b)
+        self.actionReturn.setFont(font)
         
         icon7 = QIcon()
         icon7.addFile(join(I_PATH,"quit.png"), QSize(), QIcon.Normal, QIcon.Off)
@@ -429,6 +437,7 @@ class Ui_MainWindow(object):
         horizontalLayout.setSpacing(0)
         horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.status_1 = QLabel(horizontalLayoutWidget)
+        self.status_1.setTextInteractionFlags(Qt.TextSelectableByKeyboard|Qt.TextSelectableByMouse)
         self.status_2 = QLabel(horizontalLayoutWidget)
         horizontalLayout.addWidget(self.status_1)
         horizontalLayout.addWidget(self.status_2)
@@ -445,6 +454,9 @@ class Ui_MainWindow(object):
         self.toolBar.setObjectName(u"toolBar")
         self.toolBar.setMovable(False)
         MainWindow.addToolBar(Qt.TopToolBarArea, self.toolBar)
+        # Set the icon size of the toolbar
+        #icon_size = QSize(23, 23)
+        #self.toolBar.setIconSize(icon_size)        
 
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuView.menuAction())
@@ -478,11 +490,19 @@ class Ui_MainWindow(object):
         
         self.menuFile.addAction(self.actionReload_file)
         self.actionReload_file.setText(u"Reload file")
-        self.actionReload_file.setStatusTip(u"Reload previous file")
-        self.actionReload_file.setToolTip("Reload previous file")
+        self.actionReload_file.setStatusTip(u"Reload current file")
+        self.actionReload_file.setToolTip("Reload current file")
         self.actionReload_file.setShortcut(shortcutsKeys["Reload file"])
         self.actionReload_file.setEnabled(False)
         self.menuFile.addSeparator()
+        
+        self.menuFile.addAction(self.actionReturn)
+        self.actionReturn.setText("Open previous")
+        self.actionReturn.setStatusTip("Open previous file")
+        self.actionReturn.setToolTip("Open previous file")
+        self.actionReturn.setShortcut(shortcutsKeys["Return"])
+        self.actionReturn.setEnabled(False)
+        self.menuFile.addSeparator()        
         
         self.menuFile.addAction(self.actionSave)
         self.actionSave.setText(u"Save")
@@ -654,6 +674,7 @@ class Ui_MainWindow(object):
         self.actionAll_caps.setText(u"All caps")
         
         self.toolBar.addAction(self.actionOpen)
+        self.toolBar.addAction(self.actionReturn)
         self.toolBar.addAction(self.actionReload_file)
         self.toolBar.addAction(self.actionSave)
         self.toolBar.addSeparator()
