@@ -2,6 +2,7 @@
 #
 
 from resources.DictHandle import Dictionaries, lat_cir_mapa
+from resources.IsCyrillic import checkCyrillicAlphabet 
 from settings import MAIN_SETTINGS, MULTI_FILE
 from ChoiceDialog import MultiChoiceDialog
 
@@ -93,12 +94,18 @@ class FileHandler:
 
     def findEncoding(self, filepath):
         ''''''
-        data = open(filepath, "rb").read(4)
-        if data.startswith(BOM_UTF8):
+        cyr = False
+        with open(filepath, "rb") as data_f:
+            bytes_data = data_f.read()
+        if checkCyrillicAlphabet(bytes_data) > 70:
+            cyr = True
+        if bytes_data.startswith(BOM_UTF8):
             return "utf-8-sig"
         else:
             for enc in self.fCodeList():
                 try:
+                    if cyr is True and enc == "windows-1250":
+                        continue
                     with codecs.open(filepath, 'r', encoding=enc) as fh:
                         fh.readlines()
                         fh.seek(0)
@@ -110,9 +117,13 @@ class FileHandler:
                 else:
                     logger.debug(f'{basename(filepath)}: {enc}')
                     break
-            if enc == "windows-1251" and MAIN_SETTINGS["CB_value"] == "auto":
+            if (
+                enc == "windows-1251"
+                and MAIN_SETTINGS["CB_value"] == "auto"
+                and cyr is False
+            ):
                 with open(filepath, "rb") as file_opened:
-                    content = file_opened.read()            
+                    content = file_opened.read()
                 c = 0
                 for i in "аеиo".encode("windows-1251"):
                     if content.find(i) < 0:
@@ -416,17 +427,17 @@ class DocumentHandler:
         dict1_n2 = dict_handler.dict1_n2
         dict2_n2 = dict_handler.dict2_n2
     
-        robj1 = re.compile(r'\b(' + '|'.join(map(re.escape, dictionary_1.keys())) + r')\b')
-        robj2 = re.compile(r'\b(' + '|'.join(map(re.escape, dictionary_2.keys())) + r')\b')
-        robj3 = re.compile(r'\b(' + '|'.join(map(re.escape, dictionary_0.keys())) + r')\b')
+        robj1 = re.compile(r"\b(" + "|".join(map(re.escape, dictionary_1.keys())) + r")\b")
+        robj2 = re.compile(r"\b(" + "|".join(map(re.escape, dictionary_2.keys())) + r")\b")
+        robj3 = re.compile(r"\b(" + "|".join(map(re.escape, dictionary_0.keys())) + r")\b")
     
-        robjN1 = re.compile(r'\b(' + '|'.join(map(re.escape, dict1_n.keys())) + r')\b')
-        robjN2 = re.compile(r'\b(' + '|'.join(map(re.escape, dict2_n.keys())) + r')\b')
-        robjN0 = re.compile(r'\b(' + '|'.join(map(re.escape, dict0_n.keys())) + r')\b')
+        robjN1 = re.compile(r"\b(" + "|".join(map(re.escape, dict1_n.keys())) + r")\b")
+        robjN2 = re.compile(r"\b(" + "|".join(map(re.escape, dict2_n.keys())) + r")\b")
+        robjN0 = re.compile(r"\b(" + "|".join(map(re.escape, dict0_n.keys())) + r")\b")
     
-        robjL0 = re.compile(r'\b(' + '|'.join(map(re.escape, dict0_n2.keys())) + r')\b')
-        robjL1 = re.compile(r'\b(' + '|'.join(map(re.escape, dict1_n2.keys())) + r')\b')
-        robjL2 = re.compile(r'\b(' + '|'.join(map(re.escape, dict2_n2.keys())) + r')\b')
+        robjL0 = re.compile(r"\b(" + "|".join(map(re.escape, dict0_n2.keys())) + r")\b")
+        robjL1 = re.compile(r"\b(" + "|".join(map(re.escape, dict1_n2.keys())) + r")\b")
+        robjL2 = re.compile(r"\b(" + "|".join(map(re.escape, dict2_n2.keys())) + r")\b")
         try:
             t_out1 = robj1.subn(lambda x: dictionary_1[x.group(0)], text_in)
             t_out2 = robj2.subn(lambda x: dictionary_2[x.group(0)], t_out1[0])
@@ -454,7 +465,7 @@ class DocumentHandler:
         if len(dict0_n2) != 0:
             doRepl(robjL0, dict0_n2, t_out6[0])
     
-        much = t_out1[1] + t_out2[1] + t_out3[1] + t_out4[1] + t_out5[1] + t_out6[1]
+        much = sum([t_out1[1], t_out2[1], t_out3[1], t_out4[1], t_out5[1], t_out6[1]])
         logger.debug('Transkripcija u toku.\n--------------------------------------')
         logger.debug(f'Zamenjeno ukupno {much} imena i pojmova')
     
