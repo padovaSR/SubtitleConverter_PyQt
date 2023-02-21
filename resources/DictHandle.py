@@ -4,7 +4,7 @@ import sys
 import os
 from os.path import join
 
-sys.path.append('../dictionaries')
+sys.path.append("../dictionaries")
 
 
 class Dictionaries:
