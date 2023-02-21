@@ -11,9 +11,10 @@ from PySide2.QtGui import QIcon, QFont, Qt
 from PySide2.QtWidgets import (QDialog, QApplication, QWidget, QSizePolicy, QVBoxLayout, QSplitter, 
                                QHBoxLayout, QFrame, QSpinBox, QDialogButtonBox, QLineEdit, QLabel, QAbstractSpinBox)
 
+import sys
+sys.path.append("../")
 from settings import MAIN_SETTINGS, I_PATH 
 
-import sys
 from os.path import join
 import logging.config
 
