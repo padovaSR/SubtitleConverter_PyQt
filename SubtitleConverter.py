@@ -10,10 +10,10 @@ from settings import MAIN_SETTINGS, MULTI_FILE, WORK_TEXT, main_settings_file, l
 from MultiSelection import MultiFiles 
 from ChoiceDialog import MultiChoiceDialog
 from zip_confirm import ZipStructure
-from fixer_settings import FixerSettings
+
 from settings_dialog import MainSettings
-from merger_settings import MergerSettings
-from merge import myMerger 
+from merge import myMerger
+from ChangeManually import MiniEditor 
 from TextFileProc import FileHandler, DocumentHandler, ErrorsHandler, Transliteracija, normalizeText
 
 from resources.find_replace import FindReplaceDialog
@@ -21,6 +21,8 @@ from resources.IsCyrillic import checkCyrillicAlphabet
 from resources.ErrorDialog import ErrorDialog
 from resources.renamer import RenameFiles
 from resources.FixSubtitles import SubtitleFixer
+from resources.fixer_settings import FixerSettings
+from resources.merger_settings import MergerSettings
 from resources import ExportZipFile
  
 import srt
@@ -37,6 +39,7 @@ from functools import partial
 import logging.config
 logging.config.fileConfig("resources/var/log/mainlog.ini", disable_existing_loggers=False)
 logger = logging.getLogger(__name__)
+
 
 class MainWindow(Ui_MainWindow, QMainWindow):
     
@@ -99,6 +102,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.actionTranscribe.triggered.connect(self.onTranscribe)
         self.actionCleanup.triggered.connect(self.onCleanup)
         self.actionSpecReplace.triggered.connect(self.onRepSpecial)
+        self.actionChange_manually.triggered.connect(self.onChangeManually)
         self.actionFixer.triggered.connect(self.OnFixerSettings)
         self.actionMerger.triggered.connect(self.MergeLines)
         ##======================================================================##
@@ -580,11 +584,10 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         
     def onRepSpecial(self):
         
-        
-        text = self.text_1.toPlainText()
         try:
+            text = self.text_1.toPlainText()
             ext = splitext(splitext(self.single_file)[0])[1].strip(".")
-            if re.search("(x|h)\.?264|ION(10|265)|\d{3,4}", ext, re.I) or len(ext) > 6:
+            if re.search("(x|h)\.?264|ION(10|265)|\d{3,4}", ext, re.I) or len(ext) > 8:
                 ext= ""            
             handler = SubtitleFixer()
             num, text_o = handler.doReplace(text)
@@ -600,6 +603,11 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             logger.debug(f"ReplaceSpecial Error: {e}")
             return
             
+    def onChangeManually(self):
+        """"""
+        dlg = MiniEditor()
+        dlg.exec()
+        
     def SaveFile(self):
         """"""
         FileToSave = self.single_file
