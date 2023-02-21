@@ -220,12 +220,12 @@ class Ui_MainWindow(object):
         self.actionMerger.setIcon(icon17)
         self.actionMerger.setFont(font)
         
-        self.actionChange_manualy = QAction(MainWindow)
-        self.actionChange_manualy.setObjectName(u"actionChange_manualy")
+        self.actionChange_manually = QAction(MainWindow)
+        self.actionChange_manually.setObjectName(u"actionChange_manually")
         icon18 = QIcon()
         icon18.addFile(join(I_PATH,"edit-find-replace.png"), QSize(), QIcon.Normal, QIcon.Off)
-        self.actionChange_manualy.setIcon(icon18)
-        self.actionChange_manualy.setFont(font)
+        self.actionChange_manually.setIcon(icon18)
+        self.actionChange_manually.setFont(font)
         
         self.actionSelectAll = QAction(MainWindow)
         self.actionSelectAll.setObjectName("selectAll")
@@ -604,10 +604,10 @@ class Ui_MainWindow(object):
         self.actionSpecReplace.setText(u"SpecReplace")
         self.actionSpecReplace.setStatusTip(u"SpecReplace")        
         
-        self.menuActions.addAction(self.actionChange_manualy)
-        self.actionChange_manualy.setText(u"Change manualy")
-        self.actionChange_manualy.setStatusTip(u"Manualno")
-        self.actionChange_manualy.setShortcut(shortcutsKeys["ChangeManualy"])
+        self.menuActions.addAction(self.actionChange_manually)
+        self.actionChange_manually.setText(u"Change manualy")
+        self.actionChange_manually.setStatusTip(u"Manualno")
+        self.actionChange_manually.setShortcut(shortcutsKeys["ChangeManually"])
         self.menuActions.addSeparator()
         
         self.menuActions.addAction(self.actionFixer)
