@@ -20,6 +20,7 @@ from os.path import join
 import os
 import re
 import srt
+from srt import Subtitle 
 
 import logging.config
 logger = logging.getLogger(__name__)
@@ -55,18 +56,6 @@ class Ui_Dialog(object):
         self.comboBox.setCurrentText(u"")
         self.comboBox.setPlaceholderText(u"")
         self.gridLayout.addWidget(self.comboBox, 0, 0, 1, 1)
-
-        self.label = QLabel(Dialog)
-        self.label.setObjectName(u"label")
-        font = QFont()
-        font.setFamily(u"System-ui")
-        self.label.setFont(font)
-        self.label.setToolTip(u"")
-        self.label.setText(f"Nađenih reči:\n")
-        self.label.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignTop)
-        self.label.setTextInteractionFlags(Qt.TextSelectableByMouse)
-
-        self.gridLayout.addWidget(self.label, 0, 1, 2, 1)
 
         self.lineEdit = QLineEdit(Dialog)
         self.lineEdit.setObjectName(u"lineEdit")
@@ -215,7 +204,9 @@ class Ui_Dialog(object):
 
         self.verticalSpacer = QSpacerItem(68, 108, QSizePolicy.Minimum, QSizePolicy.Expanding)
         self.gridLayout.addItem(self.verticalSpacer, 10, 1, 1, 1)
-
+        
+        font = QFont()
+        font.setFamily(u"System-ui")
         self.lineEdit_2 = QLineEdit(Dialog)
         self.lineEdit_2.setObjectName(u"lineEdit_2")
         self.lineEdit_2.setMinimumSize(QSize(0, 30))
@@ -237,6 +228,32 @@ class Ui_Dialog(object):
         self.pushButton_8.setShortcut(u"/")
         self.pushButton_8.setAutoDefault(False)
         self.gridLayout.addWidget(self.pushButton_8, 11, 1, 1, 1)
+        
+        self.label = QLabel(Dialog)
+        self.label.setObjectName(u"label")
+        font3 = QFont()
+        font3.setFamily(u"DejaVu Sans")
+        font3.setPointSize(12)
+        font3.setBold(False)
+        font3.setWeight(50)
+        self.label.setFont(font3)
+        self.label.setToolTip(u"")
+        self.label.setAccessibleDescription(u"")
+        self.label.setLayoutDirection(Qt.LeftToRight)
+        self.label.setText(u"  00000")
+        self.label.setTextInteractionFlags(Qt.TextSelectableByKeyboard|Qt.TextSelectableByMouse)
+        self.gridLayout.addWidget(self.label, 1, 1, 1, 1)
+    
+        self.pushButton_10 = QPushButton(Dialog)
+        self.pushButton_10.setObjectName(u"pushButton_10")
+        self.pushButton_10.setToolTip(u"Reload dictionary")
+        self.pushButton_10.setText(u"Reload")
+        icon1 = QIcon()
+        icon1.addFile(join(I_PATH, "reload.png"), QSize(), QIcon.Normal, QIcon.Off)
+        self.pushButton_10.setIcon(icon1)
+        self.pushButton_10.setShortcut(u"")
+        self.pushButton_10.setAutoDefault(False)
+        self.gridLayout.addWidget(self.pushButton_10, 0, 1, 1, 1)        
 
         self.verticalLayout.addLayout(self.gridLayout)
 
