@@ -7,7 +7,7 @@
 ##
 
 from PySide2.QtCore import QSize, Qt, QDir, QFileSystemWatcher
-from PySide2.QtGui import QIcon, QFont 
+from PySide2.QtGui import QIcon, QFont, QTextCharFormat, QColor, QTextCursor 
 from PySide2.QtWidgets import (QDialog, QApplication, QVBoxLayout, QGridLayout, QComboBox, QLabel, QPlainTextEdit,
                                QLineEdit, QSplitter, QSizePolicy, QPushButton, QSpacerItem, QTextEdit)
 
@@ -260,7 +260,6 @@ class Ui_Dialog(object):
         # QMetaObject.connectSlotsByName(Dialog)
     # setupUi
 class MiniEditor(Ui_Dialog, QDialog):
-    
     def __init__(self, input_text=None, parent=None):
         super(MiniEditor, self).__init__(parent)
         self.setupUi(self)
@@ -297,7 +296,7 @@ class MiniEditor(Ui_Dialog, QDialog):
         except StopIteration:
             logger.debug("Iterator was empty")
         finally:
-            self.text_3.SetValue("{0}\nEnd of subtitles reached\n{1}".format("="*20, "="*20))
+            self.text_2.setPlainText("{0}\nEnd of subtitles reached\n{1}".format("="*20, "="*20))
         try:
             t1 = list(set(r1.findall(sub.content)))
             newd = {}
@@ -309,10 +308,11 @@ class MiniEditor(Ui_Dialog, QDialog):
             for k, v in newd.items():
                 ctext = re.compile(r'\b'+k+r'\b')
                 sub.content = ctext.sub(v, sub.content)
-            self.text_3.SetValue(sub.content)
-            self.text_3.SetFocus()
+            self.text_2.setPlainText(sub.content)
+            self.text_2.setFocus()
+            # self.text_2.moveCursor(self.text_2.textCursor().End)
             for v in newd.values():
-                self.textStyle(self.text_3, sub.content, "RED", "", v)
+                self.textStyle(self.text_2, sub.content, "RED", v)
             if t1:
                 changed = Subtitle(sub.index, sub.start, sub.end, sub.content)
                 self.Replaced.append(changed)
@@ -320,15 +320,15 @@ class MiniEditor(Ui_Dialog, QDialog):
                     self.ReplacedAll.append(v)
                 self.new_d = newd
             else:
-                self.text_2.AppendText(self.composeSub(sub))
+                self.text_1.appendPlainText(self.composeSub(sub))
             return c
         except Exception as e:
             logger.debug(f"Error: {e}")
             
-    def composeSub(self, sub):
+    def composeSub(self, subtitle):
         """"""
-        start = srt.timedelta_to_srt_timestamp(sub.start)
-        end = srt.timedelta_to_srt_timestamp(sub.end)
+        start = srt.timedelta_to_srt_timestamp(subtitle.start)
+        end = srt.timedelta_to_srt_timestamp(subtitle.end)
         return f"{sub.index}\n{start} --> {end}\n{sub.content}\n\n"
         
     def FileChanged(self):
@@ -339,7 +339,20 @@ class MiniEditor(Ui_Dialog, QDialog):
         self.wdict = self.clearDict(wdict, srt.compose(self.subs, reindex=False))
         self.text_1.clear()
         self.Replaced.clear()
-        self.onReplace()            
+        self.onReplace()
+        
+    def textStyle(self, tctrl, text, style, w=r""):
+        """"""
+        pattern = re.compile(r"\b"+w+r"\b")
+        color_format = QTextCharFormat()
+        color_format.setForeground(QColor(style))        
+        cursor = tctrl.textCursor()
+        for match in re.finditer(pattern, text):
+            start = match.start()
+            end = match.end()
+            cursor.setPosition(start)
+            cursor.movePosition(QTextCursor.Right, QTextCursor.KeepAnchor, end - start)
+            cursor.setCharFormat(color_format)            
             
     @property
     def DictFolder(self):
