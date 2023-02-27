@@ -13,7 +13,6 @@ from zip_confirm import ZipStructure
 
 from settings_dialog import MainSettings
 from merge import myMerger
-from ChangeManually import MiniEditor 
 from TextFileProc import FileHandler, DocumentHandler, ErrorsHandler, Transliteracija, normalizeText
 
 from resources.find_replace import FindReplaceDialog
@@ -102,7 +101,6 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.actionTranscribe.triggered.connect(self.onTranscribe)
         self.actionCleanup.triggered.connect(self.onCleanup)
         self.actionSpecReplace.triggered.connect(self.onRepSpecial)
-        self.actionChange_manually.triggered.connect(self.onChangeManually)
         self.actionFixer.triggered.connect(self.OnFixerSettings)
         self.actionMerger.triggered.connect(self.MergeLines)
         ##======================================================================##
@@ -602,12 +600,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         except Exception as e:
             logger.debug(f"ReplaceSpecial Error: {e}")
             return
-            
-    def onChangeManually(self):
-        """"""
-        dlg = MiniEditor()
-        dlg.exec()
-        
+
     def SaveFile(self):
         """"""
         FileToSave = self.single_file
