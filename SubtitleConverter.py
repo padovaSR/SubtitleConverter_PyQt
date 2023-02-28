@@ -173,7 +173,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                     dir_file_paths = QDir(file_path).entryList(["*.srt", "*.txt", "*.zip"], QDir.Files)
                     dlg = MultiChoiceDialog(file_path=file_path, filelist=dir_file_paths)
                     if dlg.exec() == 1:
-                        selected = [join(file_path, x) for x in dlg.GetSelections()]
+                        selected = [join(file_path, x) for x in dlg.GetSelectedFiles()]
                         filePaths.extend([normpath(x) for x in selected])
                 else:
                     # file path is not a directory, append it to the list
