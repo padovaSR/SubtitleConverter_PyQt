@@ -139,14 +139,14 @@ class MultiChoiceDialog(Ui_Dialog, QDialog):
         self.accept()
         return selections
 
-    #def GetSelections(self):
-        #choices = [
-            #self.model.item(i).text()
-            #for i in range(self.model.rowCount())
-            #if self.model.item(i).checkState() is Qt.Checked
-        #]
-        #self.accept()
-        #return choices    
+    def GetSelectedFiles(self):
+        choices = [
+            self.model.item(i).text()
+            for i in range(self.model.rowCount())
+            if self.model.item(i).checkState() is Qt.Checked
+        ]
+        self.accept()
+        return choices    
     
     def onCheckBox(self):
         state = self.checkBox.checkState()
