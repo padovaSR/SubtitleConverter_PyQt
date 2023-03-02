@@ -375,6 +375,8 @@ class DocumentHandler:
         if self.cyr is True:
             bname, pre_ext = splitext(name1)
             name1 = f"{bname}.cyr_{pre_ext.strip('.')}"
+        #if re.search("_merged", name1):
+            #name1 = name1.replace("_merged", "")
         return normpath(join(dirname(file_path), f"{name1}{fsuffix}"))   ## Full path
 
     def WriteFile(self, text_in, file_path, multi=False, info=True, ask=True):
