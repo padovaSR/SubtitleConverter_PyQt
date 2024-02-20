@@ -6,9 +6,9 @@
 ## Modified by padovaSR
 ##
 
-from PySide2.QtCore import Qt, QSize
-from PySide2.QtGui import QFont, QIcon, QPixmap
-from PySide2.QtWidgets import (QLabel, QDialog, QApplication, QSizePolicy, QGridLayout, QVBoxLayout, QFrame,
+from PySide6.QtCore import Qt, QSize
+from PySide6.QtGui import QFont, QIcon, QPixmap
+from PySide6.QtWidgets import (QLabel, QDialog, QApplication, QSizePolicy, QGridLayout, QVBoxLayout, QFrame,
                                QCheckBox, QDialogButtonBox)
 
 import sys
@@ -134,4 +134,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     widget = ErrorDialog()
     widget.show()
-    sys.exit(app.exec_())        
+    sys.exit(app.exec())        
