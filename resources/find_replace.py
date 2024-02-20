@@ -6,10 +6,10 @@
 ## modified by padovaSR
 ##
 
-from PySide2.QtCore import Qt, QSize
-from PySide2.QtWidgets import (QDialog, QApplication, QHBoxLayout, QGridLayout, QLabel, QLineEdit, 
+from PySide6.QtCore import Qt, QSize
+from PySide6.QtWidgets import (QDialog, QApplication, QHBoxLayout, QGridLayout, QLabel, QLineEdit, 
                                QCheckBox, QVBoxLayout, QPushButton, QSpacerItem, QSizePolicy, QWidget)
-from PySide2.QtGui import QTextDocument, QFont
+from PySide6.QtGui import QTextDocument, QFont
 
 import sys
 
@@ -174,4 +174,4 @@ if __name__ == "__main__":
     widget = FindReplaceDialog()
     widget.show()
     # app.clipboard.clear()
-    sys.exit(app.exec_())    
+    sys.exit(app.exec())    
