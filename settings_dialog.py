@@ -6,9 +6,9 @@
 ## Modified by padovaSR
 ##
 
-from PySide2.QtCore import QSize, QRect, QItemSelectionModel
-from PySide2.QtGui import QIcon, QFont, Qt, QStandardItem, QStandardItemModel
-from PySide2.QtWidgets import (QDialog, QApplication, QWidget, QListView, QColorDialog, 
+from PySide6.QtCore import QSize, QRect, QItemSelectionModel
+from PySide6.QtGui import QIcon, QFont, Qt, QStandardItem, QStandardItemModel
+from PySide6.QtWidgets import (QDialog, QApplication, QWidget, QListView, QColorDialog, 
                                QStackedWidget, QVBoxLayout, QLabel, QSplitter, QLineEdit, QToolButton,
                                QFrame, QAbstractItemView, QDialogButtonBox, QSizePolicy, QGridLayout)
 
@@ -553,5 +553,5 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     widget = MainSettings()
     widget.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
