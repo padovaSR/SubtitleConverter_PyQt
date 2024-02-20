@@ -4,10 +4,10 @@
 ## Created by: Qt User Interface Compiler version 5.15.2
 ## Modified by padovaSR
 
-from PySide2.QtWidgets import (QPlainTextEdit, QMenuBar, QMenu, QToolBar, QHBoxLayout, 
-                                QStatusBar, QLabel, QSizePolicy, QAction, QWidget, QVBoxLayout, QComboBox,)
-from PySide2.QtCore import QSize, QRect
-from PySide2.QtGui import QIcon, QFont, Qt, QWheelEvent
+from PySide6.QtWidgets import (QPlainTextEdit, QMenuBar, QMenu, QToolBar, QHBoxLayout, 
+                                QStatusBar, QLabel, QSizePolicy, QWidget, QVBoxLayout, QComboBox,)
+from PySide6.QtCore import QSize, QRect
+from PySide6.QtGui import QIcon, QFont, Qt, QWheelEvent, QAction
 from os.path import join 
 from settings import I_PATH, MAIN_SETTINGS, shortcutsKeys
 
@@ -220,6 +220,13 @@ class Ui_MainWindow(object):
         self.actionMerger.setIcon(icon17)
         self.actionMerger.setFont(font)
         
+        self.actionChange_manualy = QAction(MainWindow)
+        self.actionChange_manualy.setObjectName(u"actionChange_manualy")
+        icon18 = QIcon()
+        icon18.addFile(join(I_PATH,"edit-find-replace.png"), QSize(), QIcon.Normal, QIcon.Off)
+        self.actionChange_manualy.setIcon(icon18)
+        self.actionChange_manualy.setFont(font)
+        
         self.actionSelectAll = QAction(MainWindow)
         self.actionSelectAll.setObjectName("selectAll")
         icon_A = QIcon()
@@ -269,8 +276,6 @@ class Ui_MainWindow(object):
         self.actionDelete.setIcon(icon24)
         self.actionDelete.setFont(font)
         
-        icon18 = QIcon()
-        icon18.addFile(join(I_PATH,"edit-find-replace.png"), QSize(), QIcon.Normal, QIcon.Off)        
         self.actionFind_Replace = QAction(MainWindow)
         self.actionFind_Replace.setObjectName(u"actionFind_Replace")
         self.actionFind_Replace.setIcon(icon18)
@@ -598,6 +603,11 @@ class Ui_MainWindow(object):
         self.menuActions.addAction(self.actionSpecReplace)
         self.actionSpecReplace.setText(u"SpecReplace")
         self.actionSpecReplace.setStatusTip(u"SpecReplace")        
+        
+        self.menuActions.addAction(self.actionChange_manualy)
+        self.actionChange_manualy.setText(u"Change manualy")
+        self.actionChange_manualy.setStatusTip(u"Manualno")
+        self.actionChange_manualy.setShortcut(shortcutsKeys["ChangeManually"])
         self.menuActions.addSeparator()
         
         self.menuActions.addAction(self.actionFixer)
