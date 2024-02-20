@@ -6,9 +6,9 @@
 ## Modified by padovaSR
 ##
 
-from PySide2.QtCore import Qt, QSize, QMetaObject
-from PySide2.QtGui import QIcon, QStandardItemModel, QStandardItem, QFont
-from PySide2.QtWidgets import (QDialog, QApplication, QListView, QCheckBox, QHBoxLayout, 
+from PySide6.QtCore import Qt, QSize, QMetaObject
+from PySide6.QtGui import QIcon, QStandardItemModel, QStandardItem, QFont
+from PySide6.QtWidgets import (QDialog, QApplication, QListView, QCheckBox, QHBoxLayout, 
                                QDialogButtonBox, QVBoxLayout, QSplitter, QLabel, QAbstractItemView)
 
 import sys
@@ -43,7 +43,7 @@ class Ui_Dialog(object):
         font.setPointSize(10)
         font.setBold(True)
         font.setItalic(False)
-        font.setWeight(font.Normal)
+        font.setWeight(QFont.Normal)
         self.label.setFont(font)        
         self.label.setText(u"Izaberi fajlove")
         self.label.setMargin(0)
@@ -139,14 +139,14 @@ class MultiChoiceDialog(Ui_Dialog, QDialog):
         self.accept()
         return selections
 
-    def GetSelectedFiles(self):
-        choices = [
-            self.model.item(i).text()
-            for i in range(self.model.rowCount())
-            if self.model.item(i).checkState() is Qt.Checked
-        ]
-        self.accept()
-        return choices    
+    #def GetSelections(self):
+        #choices = [
+            #self.model.item(i).text()
+            #for i in range(self.model.rowCount())
+            #if self.model.item(i).checkState() is Qt.Checked
+        #]
+        #self.accept()
+        #return choices    
     
     def onCheckBox(self):
         state = self.checkBox.checkState()
@@ -171,4 +171,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     widget = MultiChoiceDialog()
     widget.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
