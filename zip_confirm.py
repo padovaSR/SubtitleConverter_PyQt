@@ -5,9 +5,9 @@
 ## Created by: Qt User Interface Compiler version 5.15.2
 ## Modified by padovaSR
 
-from PySide2.QtCore import QSize
-from PySide2.QtGui import QIcon, QFont, Qt, QStandardItemModel, QStandardItem
-from PySide2.QtWidgets import (QDialog, QFileDialog, QApplication, QTreeView, QVBoxLayout, QLabel, QHBoxLayout, 
+from PySide6.QtCore import QSize
+from PySide6.QtGui import QIcon, QFont, Qt, QStandardItemModel, QStandardItem
+from PySide6.QtWidgets import (QDialog, QFileDialog, QApplication, QTreeView, QVBoxLayout, QLabel, QHBoxLayout, 
                                QRadioButton, QAbstractItemView, QCheckBox, QDialogButtonBox, QLineEdit, QPushButton)
 
 
@@ -44,7 +44,7 @@ class Ui_Dialog(object):
         font.setPointSize(9)
         font.setBold(True)
         font.setItalic(False)
-        font.setWeight(font.Normal)        
+        font.setWeight(QFont.Normal)        
         self.label_2 = QLabel(Dialog)
         self.label_2.setObjectName(u"label_2")
         self.label_2.setFont(font)
@@ -319,4 +319,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     widget = ZipStructure()
     widget.show()
-    sys.exit(app.exec_())                
+    sys.exit(app.exec())                
