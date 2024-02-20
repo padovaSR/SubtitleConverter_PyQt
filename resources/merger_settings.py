@@ -6,9 +6,9 @@
 ## Modified by padovaSR
 ##
 
-from PySide2.QtCore import QSize
-from PySide2.QtGui import QIcon, QFont, Qt
-from PySide2.QtWidgets import (QDialog, QApplication, QWidget, QSizePolicy, QVBoxLayout, QSplitter, 
+from PySide6.QtCore import QSize, Qt
+from PySide6.QtGui import QIcon, QFont
+from PySide6.QtWidgets import (QDialog, QApplication, QWidget, QSizePolicy, QVBoxLayout, QSplitter, 
                                QHBoxLayout, QFrame, QSpinBox, QDialogButtonBox, QLineEdit, QLabel, QAbstractSpinBox)
 
 import sys
@@ -211,5 +211,5 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     widget = MergerSettings()
     widget.show()
-    sys.exit(app.exec_())        
+    sys.exit(app.exec())        
 
