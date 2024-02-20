@@ -78,7 +78,7 @@ def myMerger(subs_in, max_time, max_char, _gap):
     out_f, par4, nep4 = merge_lines(par3, nep3)
     
     for i in out_f[-4:]:
-        if i.content == "We have an uneven number.": out_f.remove(i)    
+        if i.content == "Darkstar test appliance": out_f.remove(i)    
     
     WORK_TEXT.truncate(0)
     WORK_TEXT.write(srt.compose(out_f))
