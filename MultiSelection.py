@@ -6,9 +6,9 @@
 ## Modified by padovaSR
 ##
 
-from PySide2.QtCore import Qt, QSize
-from PySide2.QtGui import QIcon, QFont, QStandardItem, QStandardItemModel
-from PySide2.QtWidgets import (QDialog, QApplication, QVBoxLayout, QLabel, QSplitter, QLineEdit, QListView, QToolButton, 
+from PySide6.QtCore import Qt, QSize
+from PySide6.QtGui import QIcon, QFont, QStandardItem, QStandardItemModel
+from PySide6.QtWidgets import (QDialog, QApplication, QVBoxLayout, QLabel, QSplitter, QLineEdit, QListView, QToolButton, 
                                QRadioButton, QAbstractItemView, QCheckBox, QDialogButtonBox, QFileDialog, QSizePolicy, QProgressBar)
 
 from settings import I_PATH, MAIN_SETTINGS
@@ -52,7 +52,7 @@ class Ui_Dialog(object):
         font.setPointSize(10)
         font.setBold(True)
         font.setItalic(False)
-        font.setWeight(font.Normal)        
+        font.setWeight(QFont.Normal)        
         self.label.setFont(font)
         self.label.setText(u"Izaberi folder")
         self.label.setTextInteractionFlags(Qt.NoTextInteraction)
@@ -288,4 +288,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     widget = MultiFiles()
     widget.show()
-    sys.exit(app.exec_())        
+    sys.exit(app.exec())        
