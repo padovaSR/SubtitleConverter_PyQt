@@ -6,9 +6,9 @@
 ## Modified by padovaSR
 ##
 
-from PySide2.QtCore import QSize, Qt, QDir, QFileInfo
-from PySide2.QtGui import QIcon, QFont
-from PySide2.QtWidgets import (QDialog, QApplication, QVBoxLayout, QHBoxLayout, QLayout, QGridLayout, QLabel, QMessageBox,  
+from PySide6.QtCore import QSize, Qt, QDir, QFileInfo
+from PySide6.QtGui import QIcon, QFont
+from PySide6.QtWidgets import (QDialog, QApplication, QVBoxLayout, QHBoxLayout, QLayout, QGridLayout, QLabel, QMessageBox,  
                                QPlainTextEdit, QTreeView, QSizePolicy, QAbstractItemView, QDialogButtonBox, QFileSystemModel)
 
 import sys
@@ -30,8 +30,9 @@ logger = logging.getLogger(__name__)
 
 class CollectFiles:
     """"""
-    EP = re.compile(r"epi(z|s)od(a|e)\s*-?\s*\W*\s*\d{,2}\.?|s\d{1,2}e\d{1,2}\.?|^\d{1,2}\.srt|\d{2}\s*x\s*\d{2}|s\d{1,2}\s*x\s*e\d{1,2}", (re.I|re.M))
-    RP = re.compile(r"\d{4}\.?|(x|h)\.?26(4|5)|N(10|265)|5\.1\.?", re.I)
+    EP = re.compile(r"epi(z|s)od(a|e)\s*-?\s*\W*\s*\d{,2}\.?|s\d{1,2}e\d{1,2}\.?|^\d{1,2}\.srt|\d{1,2}\s*x\s*\d{2}|s\d{1,2}\s*x\s*e\d{1,2}|\d{1,2}\.?\s?(ep)i?(z|s)?o?d?(a|e)?", (re.I|re.M))
+    RP = re.compile(r"\d{4}\w?\.?|(x|h)\.?26(4|5)|N(10|265)|ddp5\.1\.?|\b\w{2,}\b(?<!\d)|[\.-]|(ION\d{2,3})|(?<=part[.\- ])\d+", re.I)
+    
     subtitles = []
     def __init__(self, selected_folder=None):
         self.selected_folder = selected_folder
@@ -120,7 +121,7 @@ class Ui_Dialog(object):
         self.text_1.setUndoRedoEnabled(True)
         self.text_1.setFont(font1)
         self.text_1.setPlainText(u"")
-        self.text_1.setTextInteractionFlags(Qt.TextSelectableByKeyboard|Qt.TextSelectableByMouse)
+        #self.text_1.setTextInteractionFlags(Qt.TextSelectableByKeyboard|Qt.TextSelectableByMouse)
 
         self.verticalLayout.addWidget(self.text_1)
 
