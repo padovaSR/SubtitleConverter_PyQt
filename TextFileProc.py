@@ -18,7 +18,7 @@ import re
 import srt
 
 
-from PySide2.QtWidgets import QMessageBox
+from PySide6.QtWidgets import QMessageBox
 
 import logging.config
 logger = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ class FileHandler:
         )
         msg.setIcon(QMessageBox.Critical)
         msg.setStandardButtons(QMessageBox.Ok)
-        msg.exec_()
+        msg.exec()
 
     @staticmethod
     def fCodeList():
@@ -375,8 +375,6 @@ class DocumentHandler:
         if self.cyr is True:
             bname, pre_ext = splitext(name1)
             name1 = f"{bname}.cyr_{pre_ext.strip('.')}"
-        #if re.search("_merged", name1):
-            #name1 = name1.replace("_merged", "")
         return normpath(join(dirname(file_path), f"{name1}{fsuffix}"))   ## Full path
 
     def WriteFile(self, text_in, file_path, multi=False, info=True, ask=True):
