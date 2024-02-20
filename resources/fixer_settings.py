@@ -5,9 +5,9 @@
 ## Created by: Qt User Interface Compiler version 5.15.2
 ##
 
-from PySide2.QtCore import QSize
-from PySide2.QtGui import QIcon, QFont, Qt
-from PySide2.QtWidgets import (QDialog, QApplication, QSizePolicy, QVBoxLayout, QGridLayout,
+from PySide6.QtCore import QSize, Qt
+from PySide6.QtGui import QIcon, QFont
+from PySide6.QtWidgets import (QDialog, QApplication, QSizePolicy, QVBoxLayout, QGridLayout,
                                QHBoxLayout, QLayout, QFrame, QCheckBox, QSpinBox, QDialogButtonBox)
 
 import sys
@@ -229,4 +229,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     widget = FixerSettings()
     widget.show()
-    sys.exit(app.exec_())        
+    sys.exit(app.exec())        
