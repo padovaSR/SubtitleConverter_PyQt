@@ -31,15 +31,15 @@ def checkCyrillicAlphabet(input_text):
         
     if isinstance(input_text, bytes):
         input_text = decode_text()
-        
-    def percentage(part, whole):
-        try:
-            return float("{:.2f}".format(100*part/whole))
-        except ZeroDivisionError:
-            logger.debug(f"File is empty")
-            return 0    
             
     def checkChars() -> int:
+        def percentage(part, whole):
+            try:
+                return int(100*part/whole)
+            except ZeroDivisionError:
+                logger.debug(f"File is empty")
+                return 0
+
         st_pattern = re.compile(r"[\u0400-\u04FF]", re.U)
         rx = "".join((st_pattern.findall(input_text)))
         procenat = percentage(len(rx), len(list(filter(str.isalpha, input_text))))
