@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 
 
-from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, QDialog, QFontDialog, QColorDialog, QMessageBox, QAction
-from PySide2.QtGui import QFont, QTextCursor
-from PySide2.QtCore import Qt, QFileInfo, QDir, QEventLoop, QTimer
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QDialog, QFontDialog, QColorDialog, QMessageBox
+from PySide6.QtGui import QFont, QTextCursor, QAction
+from PySide6.QtCore import Qt, QFileInfo, QDir, QEventLoop, QTimer
 
 from sc_gui import Ui_MainWindow
 from settings import MAIN_SETTINGS, MULTI_FILE, WORK_TEXT, main_settings_file, log_file_history, printEncoding, updateRecentFiles
 from MultiSelection import MultiFiles 
 from ChoiceDialog import MultiChoiceDialog
 from zip_confirm import ZipStructure
-
+from fixer_settings import FixerSettings
 from settings_dialog import MainSettings
-from merge import myMerger
+from merger_settings import MergerSettings
+from merge import myMerger 
 from TextFileProc import FileHandler, DocumentHandler, ErrorsHandler, Transliteracija, normalizeText
 
 from resources.find_replace import FindReplaceDialog
@@ -20,9 +21,8 @@ from resources.IsCyrillic import checkCyrillicAlphabet
 from resources.ErrorDialog import ErrorDialog
 from resources.renamer import RenameFiles
 from resources.FixSubtitles import SubtitleFixer
-from resources.fixer_settings import FixerSettings
-from resources.merger_settings import MergerSettings
 from resources import ExportZipFile
+from resources import ChangeManually  
  
 import srt
 import re
@@ -101,6 +101,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.actionTranscribe.triggered.connect(self.onTranscribe)
         self.actionCleanup.triggered.connect(self.onCleanup)
         self.actionSpecReplace.triggered.connect(self.onRepSpecial)
+        self.actionChange_manualy.triggered.connect(self.onChangeManually)
         self.actionFixer.triggered.connect(self.OnFixerSettings)
         self.actionMerger.triggered.connect(self.MergeLines)
         ##======================================================================##
@@ -173,7 +174,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                     dir_file_paths = QDir(file_path).entryList(["*.srt", "*.txt", "*.zip"], QDir.Files)
                     dlg = MultiChoiceDialog(file_path=file_path, filelist=dir_file_paths)
                     if dlg.exec() == 1:
-                        selected = [join(file_path, x) for x in dlg.GetSelectedFiles()]
+                        selected = [join(file_path, x) for x in dlg.GetSelections()]
                         filePaths.extend([normpath(x) for x in selected])
                 else:
                     # file path is not a directory, append it to the list
@@ -260,7 +261,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                 loop.quit()
             else:
                 QTimer.singleShot(10, loop.quit)
-            loop.exec_()
+            loop.exec()
             
     def changeEncoding(self):
         """"""
@@ -439,7 +440,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         msg.setInformativeText(message)
         msg.setIcon(QMessageBox.Information)
         msg.setStandardButtons(QMessageBox.Ok)
-        msg.exec_()
+        msg.exec()
         
     def RenameFiles(self):
         """"""
@@ -600,7 +601,12 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         except Exception as e:
             logger.debug(f"ReplaceSpecial Error: {e}")
             return
-
+            
+    def onChangeManually(self):
+        """"""
+        dlg = ChangeManually.MiniEditor()
+        dlg.exec()
+        
     def SaveFile(self):
         """"""
         FileToSave = self.single_file
@@ -703,7 +709,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         dlg.exec()
             
     def OnMainSettings(self):
-        settings_dlg = MainSettings(None)
+        settings_dlg = MainSettings()
         result = settings_dlg.exec()
         if result == QDialog.Accepted:
             with open(main_settings_file, "w") as wf:
@@ -857,4 +863,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     widget = MainWindow()
     widget.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
