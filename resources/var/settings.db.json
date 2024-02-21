@@ -39,16 +39,16 @@
         "spejsevi": true,
         "crtice_sp": true,
         "crtice": true,
-        "linije": false,
+        "linije": true,
         "fixgap": true,
         "shrinkgap": true,
-        "mingap": 62,
+        "mingap": 100,
         "maxgap": 320
     },
     "CB_value": "auto",
     "FrameSize": {
-        "W": 628,
-        "H": 604
+        "W": 659,
+        "H": 626
     },
     "added_ext": [
         ".fixed",
@@ -68,8 +68,8 @@
         "H": 506
     },
     "Renamer": {
-        "W": 828,
-        "H": 667,
-        "Selected": "C:\\Users\\darkstar\\Desktop\\SUBS"
+        "W": 996,
+        "H": 686,
+        "Selected": "C:\\Users\\darkstar\\Desktop"
     }
 }
