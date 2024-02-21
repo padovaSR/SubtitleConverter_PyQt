@@ -220,12 +220,12 @@ class Ui_MainWindow(object):
         self.actionMerger.setIcon(icon17)
         self.actionMerger.setFont(font)
         
-        self.actionChange_manualy = QAction(MainWindow)
-        self.actionChange_manualy.setObjectName(u"actionChange_manualy")
         icon18 = QIcon()
-        icon18.addFile(join(I_PATH,"edit-find-replace.png"), QSize(), QIcon.Normal, QIcon.Off)
-        self.actionChange_manualy.setIcon(icon18)
-        self.actionChange_manualy.setFont(font)
+        #self.actionChange_manualy = QAction(MainWindow)
+        #self.actionChange_manualy.setObjectName(u"actionChange_manualy")
+        #icon18.addFile(join(I_PATH,"edit-find-replace.png"), QSize(), QIcon.Normal, QIcon.Off)
+        #self.actionChange_manualy.setIcon(icon18)
+        #self.actionChange_manualy.setFont(font)
         
         self.actionSelectAll = QAction(MainWindow)
         self.actionSelectAll.setObjectName("selectAll")
@@ -307,6 +307,7 @@ class Ui_MainWindow(object):
         
         self.actionMerger_settings = QAction(MainWindow)
         self.actionMerger_settings.setObjectName(u"actionMerger_settings")
+        self.actionMerger_settings.setShortcut(shortcutsKeys["MergerSettings"])
         icon27 = QIcon()
         icon27.addFile(join(I_PATH,"document-properties.png"), QSize(), QIcon.Normal, QIcon.Off)
         self.actionMerger_settings.setIcon(icon27)
@@ -604,10 +605,10 @@ class Ui_MainWindow(object):
         self.actionSpecReplace.setText(u"SpecReplace")
         self.actionSpecReplace.setStatusTip(u"SpecReplace")        
         
-        self.menuActions.addAction(self.actionChange_manualy)
-        self.actionChange_manualy.setText(u"Change manualy")
-        self.actionChange_manualy.setStatusTip(u"Manualno")
-        self.actionChange_manualy.setShortcut(shortcutsKeys["ChangeManually"])
+        #self.menuActions.addAction(self.actionChange_manualy)
+        #self.actionChange_manualy.setText(u"Change manualy")
+        #self.actionChange_manualy.setStatusTip(u"Manualno")
+        #self.actionChange_manualy.setShortcut(shortcutsKeys["ChangeManually"])
         self.menuActions.addSeparator()
         
         self.menuActions.addAction(self.actionFixer)
