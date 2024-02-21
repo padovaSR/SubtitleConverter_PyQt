@@ -12,7 +12,7 @@ import srt
 import re
 from textwrap import TextWrapper
 
-from PySide2.QtWidgets import QMessageBox
+from PySide6.QtWidgets import QMessageBox
 
 import logging.config
 logger = logging.getLogger(__name__)
