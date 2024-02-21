@@ -101,7 +101,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.actionTranscribe.triggered.connect(self.onTranscribe)
         self.actionCleanup.triggered.connect(self.onCleanup)
         self.actionSpecReplace.triggered.connect(self.onRepSpecial)
-        self.actionChange_manualy.triggered.connect(self.onChangeManually)
+        #self.actionChange_manualy.triggered.connect(self.onChangeManually)
         self.actionFixer.triggered.connect(self.OnFixerSettings)
         self.actionMerger.triggered.connect(self.MergeLines)
         ##======================================================================##
