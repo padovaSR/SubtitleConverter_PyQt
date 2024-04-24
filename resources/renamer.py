@@ -17,11 +17,9 @@ import re
 import shutil
 import getpass
 import platform
-from os.path import basename, join, dirname, split, splitext
-from collections import defaultdict
+from os.path import basename, join, dirname, splitext, normpath
 
 sys.path.append("../")
-
 from settings import MAIN_SETTINGS
 
 import logging.config
@@ -31,7 +29,7 @@ logger = logging.getLogger(__name__)
 class CollectFiles:
     """"""
     EP = re.compile(r"epi(z|s)od(a|e)\s*-?\s*\W*\s*\d{,2}\.?|s\d{1,2}e\d{1,2}\.?|^\d{1,2}\.srt|\d{1,2}\s*x\s*\d{2}|s\d{1,2}\s*x\s*e\d{1,2}|\d{1,2}\.?\s?(ep)i?(z|s)?o?d?(a|e)?", (re.I|re.M))
-    RP = re.compile(r"\d{4}\w?\.?|(x|h)\.?26(4|5)|N(10|265)|ddp5\.1\.?|\b\w{2,}\b(?<!\d)|[\.-]|(ION\d{2,3})|(?<=part[.\- ])\d+", re.I)
+    RP = re.compile(r"\d{4}\w?\.?|(x|h)\.?26(4|5)|N(10|265)|ddp5\.1\.?|\b\w{2,}\b(?<!\d)|[ \.-]|(ION\d{2,3})|(?<=part[.\- ])\d+|s\d\d?e", re.I)
     
     subtitles = []
     def __init__(self, selected_folder=None):
@@ -47,28 +45,35 @@ class CollectFiles:
             for entry in it:
                 if not entry.name.startswith('.') and entry.is_file():
                     if entry.name.lower().endswith(ext):
-                        if self.EP.search(self.RP.sub('', entry.name)):
-                            subs_list.append(entry.name)
-                            self.subtitles.append(join(folderIn, entry.name))
-                            self.subtitles.sort()
+                        subs_list.append(entry.name)
                     if entry.name.lower().endswith((".mp4", ".mkv", ".avi")):
-                        if self.EP.search(self.RP.sub('', entry.name)):
-                            vids_list.append(entry.name)
+                        vids_list.append(entry.name)
             if not vids_list:
                 message = "<h4>Missing Files</h4>\n"
                 message += f"Unable to find video files.\nFiles required as reference."
                 QMessageBox.critical(None, " Renamer", message, QMessageBox.Ok)
-        return sorted(subs_list), sorted(vids_list)    
+        return subs_list, vids_list    
     
-    def newFiles(self, subs=[], vids=[], ext=None):
+    def reorderFiles(self, subs=[], vids=[], ext=None):
         """"""
-        new_files_list = []
-        for pair in zip(subs, vids):
-            a = re.match(r"\d{1,2}", str(self.EP.search(self.RP.sub('', pair[1]))))
-            b = re.match(r"\d{1,2}", str(self.EP.search(self.RP.sub('', pair[0]))))        
-            if a == b:
-                new_files_list.append(f"{splitext(pair[1])[0]}{ext}")
-        return new_files_list    
+        new_subs_list = []
+        new_vids_list = []
+        try:
+            for pair in zip(subs, vids):
+                a = re.match(r"\d{1,2}", self.RP.sub("", self.EP.search(pair[0]).group(0))).group(0)
+                b = re.match(r"\d{1,2}", self.RP.sub("", self.EP.search(pair[1]).group(0))).group(0)
+                a = int(a.lstrip("0"))
+                if a != 0:
+                    a = a-1
+                b = int(b.lstrip("0"))
+                if b != 0:
+                    b = b-1
+                new_subs_list.insert(a, pair[0])
+                new_vids_list.insert(b, pair[1])
+                self.subtitles.insert(a, normpath(join(self.selected_folder, pair[0])))
+        except Exception as e:
+            logger.debug(f"reorderFiles: {e}")
+        return new_subs_list,new_vids_list    
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -242,16 +247,17 @@ class RenameFiles(Ui_Dialog, QDialog):
         collector = CollectFiles(self.current_path)
         try:
             title_list,video_list = collector.listFiles(self.suffix)
-            new_file_list = collector.newFiles(title_list, video_list, self.suffix)
+            new_subs_list,new_vids_list = collector.reorderFiles(title_list, video_list, self.suffix)
             self.vid_suffix = splitext(video_list[0])[1]
             self.subtitles = collector.subtitles
+            renamed_subs_list = [splitext(filename)[0] + ".srt" for filename in new_vids_list]
             
-            for title_name in title_list:
+            for title_name in new_subs_list:
                 self.text_1.appendPlainText(f"{title_name}")
-            for file_name in new_file_list:
+            for file_name in renamed_subs_list:
                 self.text_2.appendPlainText(f"{file_name}")
         except Exception as e:
-                logger.debug(f"Error: {e}")
+                logger.debug(f"getNames: {e}")
             
     def renameFiles(self):
         ''''''
@@ -259,7 +265,7 @@ class RenameFiles(Ui_Dialog, QDialog):
         renamed.clear()
         playlist = None
         if self.text_2.blockCount() > 1:
-            pl_name = f"{split(dirname(self.subtitles[0]))[1]}.m3u"
+            pl_name = f"{basename(dirname(self.subtitles[0]))}.m3u"
             pl_file = join(dirname(self.subtitles[0]), pl_name)
             with open(pl_file, "w", encoding="utf-8") as pl:
                 pl.write(f"#{basename(pl_file)[:-4]} Playlist\n")
@@ -274,7 +280,7 @@ class RenameFiles(Ui_Dialog, QDialog):
                 playlist.write(f"{splitext(line)[0]}{self.vid_suffix}\n")                
                 logger.debug(f"{basename(self.subtitles[i])} -> {line}")
             except Exception as e:
-                logger.debug(f"{e}")
+                logger.debug(f"renameFiles: {e}")
         if playlist: playlist.close()
         self.subtitles.clear()
         self.checkRenamed()
