@@ -73,7 +73,7 @@ class CollectFiles:
                 self.subtitles.insert(a, normpath(join(self.selected_folder, pair[0])))
         except Exception as e:
             logger.debug(f"reorderFiles: {e}")
-        return new_subs_list,new_vids_list    
+        return sorted(new_subs_list), sorted(new_vids_list)    
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -249,7 +249,7 @@ class RenameFiles(Ui_Dialog, QDialog):
             title_list,video_list = collector.listFiles(self.suffix)
             new_subs_list,new_vids_list = collector.reorderFiles(title_list, video_list, self.suffix)
             self.vid_suffix = splitext(video_list[0])[1]
-            self.subtitles = collector.subtitles
+            self.subtitles = sorted(collector.subtitles)
             renamed_subs_list = [splitext(filename)[0] + ".srt" for filename in new_vids_list]
             
             for title_name in new_subs_list:
