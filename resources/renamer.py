@@ -54,26 +54,36 @@ class CollectFiles:
                 QMessageBox.critical(None, " Renamer", message, QMessageBox.Ok)
         return subs_list, vids_list    
     
-    def reorderFiles(self, subs=[], vids=[], ext=None):
+    def reorderFiles(self, subs=[], vids=[]):
         """"""
         new_subs_list = []
         new_vids_list = []
         try:
             for pair in zip(subs, vids):
-                a = re.match(r"\d{1,2}", self.RP.sub("", self.EP.search(pair[0]).group(0))).group(0)
-                b = re.match(r"\d{1,2}", self.RP.sub("", self.EP.search(pair[1]).group(0))).group(0)
-                a = int(a.lstrip("0"))
-                if a != 0:
-                    a = a-1
-                b = int(b.lstrip("0"))
-                if b != 0:
-                    b = b-1
-                new_subs_list.insert(a, pair[0])
-                new_vids_list.insert(b, pair[1])
-                self.subtitles.insert(a, normpath(join(self.selected_folder, pair[0])))
+                a = int(re.match(r"\d{1,2}", self.RP.sub("", self.EP.search(pair[0]).group(0))).group(0))
+                b = int(re.match(r"\d{1,2}", self.RP.sub("", self.EP.search(pair[1]).group(0))).group(0))
+                a = max(0, a - 1)
+                b = max(0, b - 1)
+                
+                # Extend the lists if necessary
+                while len(new_subs_list) <= a:
+                    new_subs_list.append(None)
+                while len(new_vids_list) <= b:
+                    new_vids_list.append(None)
+                while len(self.subtitles) <= a:
+                    self.subtitles.append(None)
+            
+                # Insert elements into new lists
+                new_subs_list[a] = pair[0]
+                new_vids_list[b] = pair[1]
+                self.subtitles[a] = normpath(join(self.selected_folder, pair[0]))
+            # Remove trailing None elements
+            new_subs_list = [x for x in new_subs_list if x is not None]
+            new_vids_list = [x for x in new_vids_list if x is not None]
+            self.subtitles = [x for x in self.subtitles if x is not None]
         except Exception as e:
             logger.debug(f"reorderFiles: {e}")
-        return sorted(new_subs_list), sorted(new_vids_list)    
+        return new_subs_list,new_vids_list    
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -247,10 +257,10 @@ class RenameFiles(Ui_Dialog, QDialog):
         collector = CollectFiles(self.current_path)
         try:
             title_list,video_list = collector.listFiles(self.suffix)
-            new_subs_list,new_vids_list = collector.reorderFiles(title_list, video_list, self.suffix)
+            new_subs_list,new_vids_list = collector.reorderFiles(title_list, video_list)
             self.vid_suffix = splitext(video_list[0])[1]
             self.subtitles = sorted(collector.subtitles)
-            renamed_subs_list = [splitext(filename)[0] + ".srt" for filename in new_vids_list]
+            renamed_subs_list = [splitext(filename)[0] + self.suffix for filename in new_vids_list]
             
             for title_name in new_subs_list:
                 self.text_1.appendPlainText(f"{title_name}")
