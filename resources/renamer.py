@@ -274,21 +274,20 @@ class RenameFiles(Ui_Dialog, QDialog):
         renamed = self.renamed
         renamed.clear()
         playlist = None
-        if self.text_2.blockCount() > 1:
-            pl_name = f"{basename(dirname(self.subtitles[0]))}.m3u"
-            pl_file = join(dirname(self.subtitles[0]), pl_name)
+        if self.text_2.blockCount() >= 1:
+            pl_name = f"{basename(self.current_path)}.m3u"
+            pl_file = join(self.current_path, pl_name)
             with open(pl_file, "w", encoding="utf-8") as pl:
                 pl.write(f"#{basename(pl_file)[:-4]} Playlist\n")
             playlist = open(pl_file, "a", encoding="utf-8")
-            document = self.text_2.document()
-        for i in range(self.text_2.blockCount()):
+            new_lines = self.text_2.toPlainText().split('\n')
+        for i in range(len(new_lines)):
             try:
-                line = document.findBlockByNumber(i).text().strip()
-                new_name = join(dirname(self.subtitles[i]), line)
+                new_name = join(self.current_path, new_lines[i])
                 shutil.move(self.subtitles[i], new_name)
-                renamed.append(f"{line}\n")
-                playlist.write(f"{splitext(line)[0]}{self.vid_suffix}\n")                
-                logger.debug(f"{basename(self.subtitles[i])} -> {line}")
+                renamed.append(f"{new_lines[i]}\n")
+                playlist.write(f"{splitext(new_lines[i])[0]}{self.vid_suffix}\n")                
+                logger.debug(f"{basename(self.subtitles[i])} -> {new_lines[i]}")
             except Exception as e:
                 logger.debug(f"renameFiles: {e}")
         if playlist: playlist.close()
@@ -302,7 +301,7 @@ class RenameFiles(Ui_Dialog, QDialog):
         renamed = [item.strip() for item in self.renamed]
         if s_list and renamed:
             try:
-                if len(s_list) == len(renamed) and all(a == b for a, b in zip(s_list, renamed)) is True:
+                if len(s_list) == len(renamed) and set(s_list) == set(renamed):
                     flattened_list = "\n".join(s_list)
                     message = "<h4>Fajlovi su uspešno preimenovani</h4>\n"
                     message += f"{flattened_list}"
@@ -369,7 +368,7 @@ class RenameFiles(Ui_Dialog, QDialog):
         
     def writeSettings(self):
         """"""
-        MAIN_SETTINGS["Renamer"] = {"W": self.width(), "H": self.height(), "Selected": self.label_2.text()}
+        MAIN_SETTINGS["Renamer"] = {"W": self.width(), "H": self.height(), "Selected": dirname(self.label_2.text())}
         
     def on_close_event(self, event):
         self.writeSettings()
