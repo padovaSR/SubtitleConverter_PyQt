@@ -59,28 +59,33 @@ class CollectFiles:
         new_subs_list = []
         new_vids_list = []
         try:
-            for pair in zip(subs, vids):
-                a = int(re.match(r"\d{1,2}", self.RP.sub("", self.EP.search(pair[0]).group(0))).group(0))
-                b = int(re.match(r"\d{1,2}", self.RP.sub("", self.EP.search(pair[1]).group(0))).group(0))
-                a = max(0, a - 1)
-                b = max(0, b - 1)
+            if len(subs) > 1 and len(vids) > 1:
+                for pair in zip(subs, vids):
+                    a = int(re.match(r"\d{1,2}", self.RP.sub("", self.EP.search(pair[0]).group(0))).group(0))
+                    b = int(re.match(r"\d{1,2}", self.RP.sub("", self.EP.search(pair[1]).group(0))).group(0))
+                    a = max(0, a - 1)
+                    b = max(0, b - 1)
+                    
+                    # Extend the lists if necessary
+                    while len(new_subs_list) <= a:
+                        new_subs_list.append(None)
+                    while len(new_vids_list) <= b:
+                        new_vids_list.append(None)
+                    while len(self.subtitles) <= a:
+                        self.subtitles.append(None)
                 
-                # Extend the lists if necessary
-                while len(new_subs_list) <= a:
-                    new_subs_list.append(None)
-                while len(new_vids_list) <= b:
-                    new_vids_list.append(None)
-                while len(self.subtitles) <= a:
-                    self.subtitles.append(None)
-            
-                # Insert elements into new lists
-                new_subs_list[a] = pair[0]
-                new_vids_list[b] = pair[1]
-                self.subtitles[a] = normpath(join(self.selected_folder, pair[0]))
-            # Remove trailing None elements
-            new_subs_list = [x for x in new_subs_list if x is not None]
-            new_vids_list = [x for x in new_vids_list if x is not None]
-            self.subtitles = [x for x in self.subtitles if x is not None]
+                    # Insert elements into new lists
+                    new_subs_list[a] = pair[0]
+                    new_vids_list[b] = pair[1]
+                    self.subtitles[a] = normpath(join(self.selected_folder, pair[0]))
+                # Remove trailing None elements
+                new_subs_list = [x for x in new_subs_list if x is not None]
+                new_vids_list = [x for x in new_vids_list if x is not None]
+                self.subtitles = [x for x in self.subtitles if x is not None]
+            else:
+                new_subs_list = subs
+                new_vids_list = vids
+                self.subtitles.append(normpath(join(self.selected_folder, subs[0])))
         except Exception as e:
             logger.debug(f"reorderFiles: {e}")
         return new_subs_list,new_vids_list    
@@ -211,7 +216,7 @@ class RenameFiles(Ui_Dialog, QDialog):
         self.buttonBox.accepted.connect(self.renameFiles)
         self.buttonBox.rejected.connect(self.onRejected)
         self.treeView.doubleClicked.connect(self.ActivatedFolder)
-        # self.treeView.activated.connect(self.ActivatedFolder)
+        #self.treeView.activated.connect(self.ActivatedFolder)
         self.treeView.clicked.connect(self.getSelectedFolder)
         self.treeView.selectionModel().selectionChanged.connect(self.getSelectedFolder)
         
@@ -238,8 +243,8 @@ class RenameFiles(Ui_Dialog, QDialog):
                 event.accept()
                 event.setDropAction(Qt.CopyAction)
                 break
-        else:
-            event.ignore()
+            else:
+                event.ignore()
             
     def dropEvent(self, event):
         if not event.mimeData().hasUrls():
@@ -255,11 +260,11 @@ class RenameFiles(Ui_Dialog, QDialog):
         self.text_1.clear()
         self.text_2.clear()
         collector = CollectFiles(self.current_path)
+        title_list,video_list = collector.listFiles(self.suffix)
         try:
-            title_list,video_list = collector.listFiles(self.suffix)
             new_subs_list,new_vids_list = collector.reorderFiles(title_list, video_list)
             self.vid_suffix = splitext(video_list[0])[1]
-            self.subtitles = sorted(collector.subtitles)
+            self.subtitles = collector.subtitles
             renamed_subs_list = [splitext(filename)[0] + self.suffix for filename in new_vids_list]
             
             for title_name in new_subs_list:
@@ -275,18 +280,20 @@ class RenameFiles(Ui_Dialog, QDialog):
         renamed.clear()
         playlist = None
         if self.text_2.blockCount() >= 1:
-            pl_name = f"{basename(self.current_path)}.m3u"
-            pl_file = join(self.current_path, pl_name)
-            with open(pl_file, "w", encoding="utf-8") as pl:
-                pl.write(f"#{basename(pl_file)[:-4]} Playlist\n")
-            playlist = open(pl_file, "a", encoding="utf-8")
             new_lines = self.text_2.toPlainText().split('\n')
+            if len(new_lines) > 1:
+                pl_name = f"{basename(self.current_path)}.m3u"
+                pl_file = join(self.current_path, pl_name)
+                with open(pl_file, "w", encoding="utf-8") as pl:
+                    pl.write(f"#{basename(pl_file)[:-4]} Playlist\n")
+                playlist = open(pl_file, "a", encoding="utf-8")
         for i in range(len(new_lines)):
             try:
                 new_name = join(self.current_path, new_lines[i])
                 shutil.move(self.subtitles[i], new_name)
                 renamed.append(f"{new_lines[i]}\n")
-                playlist.write(f"{splitext(new_lines[i])[0]}{self.vid_suffix}\n")                
+                if len(new_lines) > 1:
+                    playlist.write(f"{splitext(new_lines[i])[0]}{self.vid_suffix}\n")                
                 logger.debug(f"{basename(self.subtitles[i])} -> {new_lines[i]}")
             except Exception as e:
                 logger.debug(f"renameFiles: {e}")
