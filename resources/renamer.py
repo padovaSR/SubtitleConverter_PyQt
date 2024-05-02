@@ -48,9 +48,9 @@ class CollectFiles:
                         subs_list.append(entry.name)
                     if entry.name.lower().endswith((".mp4", ".mkv", ".avi")):
                         vids_list.append(entry.name)
-            if not vids_list:
+            if not vids_list or not subs_list:
                 message = "<h4>Missing Files</h4>\n"
-                message += f"Unable to find video files.\nFiles required as reference."
+                message += f"Unable to find video or *srt files.\nFiles required as reference."
                 QMessageBox.critical(None, " Renamer", message, QMessageBox.Ok)
         return subs_list, vids_list    
     
