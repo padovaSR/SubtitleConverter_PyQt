@@ -28,20 +28,17 @@ class SubtitleFixer:
     def rm_dash(text_in):
         
         # ------------------------------------------------------------------------------------------ #
-        cb1_s = MAIN_SETTINGS['key1']['fixgap']
-        cb2_s = MAIN_SETTINGS['key1']['linije']
-        cb3_s = MAIN_SETTINGS['key1']['italik']
-        cb4_s = MAIN_SETTINGS['key1']['crtice']
-        cb5_s = MAIN_SETTINGS['key1']['crtice_sp']
-        cb6_s = MAIN_SETTINGS['key1']['spejsevi']
-        cb7_s = MAIN_SETTINGS['key1']['kolor']
-        cb_nl = MAIN_SETTINGS['key1']['breaks']
-        cb8_s = MAIN_SETTINGS['key1']['nuliranje']
+        cb1_s = MAIN_SETTINGS['key1']["fixgap"]
+        cb2_s = MAIN_SETTINGS['key1']["linije"]
+        cb3_s = MAIN_SETTINGS['key1']["kolor"]
+        cb4_s = MAIN_SETTINGS['key1']["crtice"]
+        cb5_s = MAIN_SETTINGS['key1']["crtice_sp"]
+        cb6_s = MAIN_SETTINGS['key1']["spejsevi"]
+        cb7_s = MAIN_SETTINGS['key1']["italik"]
+        cb_nl = MAIN_SETTINGS['key1']["breaks"]
+        cb8_s = MAIN_SETTINGS['key1']["nuliranje"]
         # ------------------------------------------------------------------------------------------ #
-        #  cb1_s Popravi gapove, cb2_s Poravnaj linije, cb3_s italik tagovi, cb8_s=nuliranje         #
-        #  cb4_s Crtice na pocetku prvog reda, cb5_s Spejs iza crtice, cb6_s Vise spejseva u jedan   #
-        # ------------------------------------------------------------------------------------------ #            
-
+        
         reg_0 = re.compile(r"\d{2}:\d{2}:\d{2},\d{3} --> \d{2}:\d{2}:\d{2},\d{3}")
         for_rpls = re.compile(r'(?<=\d,\d\d\d\n)-+\s*')
         _space_r = re.compile(r'^ +', re.M)
@@ -60,10 +57,6 @@ class SubtitleFixer:
         if cb4_s is True:
             text = apply_regex(text, for_rpls, '')
 
-        if cb6_s is True:
-            text = apply_regex(text, spaceS_r, ' ')
-            text = apply_regex(text, pe_r, "")
-
         if cb5_s is True:
             text = apply_regex(text, cs_r, '-')
         elif cb5_s is False:
@@ -73,21 +66,24 @@ class SubtitleFixer:
 
         if cb7_s is True:
             subs = list(srt.parse(text, ignore_errors=True))
+            tag_pattern = re.compile(r"</i> *\r?\n *<i>")
+            tag_pattern1 = re.compile(r"</i>\s*\s*<i>")
+            tag_pattern2 = re.compile(r"</i> *\- *<i>")
             if len(subs) > 0:
                 new_f = []
                 for i in range(len(subs)):
-                    t = subs[i].content
-                    t = (
-                            t.replace('</i><i>', '')
-                            .replace('</i> <i>', ' ')
-                            .replace('</i>\n<i>', '\n')
-                            .replace('</i>-<i>', '-')
-                            .replace('</i>\n-<i>', '-\n')
-                        )
-                    new_f.append(srt.Subtitle(subs[i].index, subs[i].start, subs[i].end, t))
+                    line = subs[i].content
+                    line = tag_pattern.sub("\n", line)
+                    line = tag_pattern1.sub(r" ", line)
+                    line = tag_pattern2.sub(r"-", line)
+                    new_f.append(srt.Subtitle(subs[i].index, subs[i].start, subs[i].end, line))
                 text = srt.compose(new_f)
             else:
                 logger.debug('Fixer: No subtitles found!')
+
+        if cb6_s is True:
+            text = apply_regex(text, spaceS_r, " ")
+            text = apply_regex(text, pe_r, "")
 
         if cb2_s is True:
             subs = list(srt.parse(text, ignore_errors=True))
