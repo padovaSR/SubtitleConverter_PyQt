@@ -223,6 +223,7 @@ class RenameFiles(Ui_Dialog, QDialog):
         self.closeEvent = self.on_close_event
         
         self.text_2.setAcceptDrops(False)
+        self.text_1.setAcceptDrops(False)
         self.setAcceptDrops(True)
         
         self.setup_tree_view()
@@ -243,9 +244,9 @@ class RenameFiles(Ui_Dialog, QDialog):
                 event.accept()
                 event.setDropAction(Qt.CopyAction)
                 break
-            else:
-                event.ignore()
-            
+        else:
+            event.ignore()
+
     def dropEvent(self, event):
         if not event.mimeData().hasUrls():
             return
