@@ -185,19 +185,17 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.OpenFiles(filePaths)
         
     def onOpen(self):
-        options = QFileDialog.Options()
-        options |= QFileDialog.ReadOnly
-
-        # open a file dialog to select files with the extensions srt, zip and txt
+        # Open a file dialog to select files with the extensions srt, zip, and txt
         filenames, _ = QFileDialog.getOpenFileNames(
             self,
             "Select files",
             "",
-            "SubRip (*.srt *.txt *.zip);; All files (*.*)",
-            options=options,
+            "SubRip (*.srt *.txt *.zip);;All files (*.*)",
+            options=QFileDialog.ReadOnly
         )
+        
         if filenames:
-            self.OpenFiles(filenames)
+            self.OpenFiles(filenames)    
     
     def OpenFiles(self, file_paths):
         if not isinstance(file_paths, list):
