@@ -144,7 +144,7 @@ class Ui_Dialog(object):
         font = QFont()
         font.setFamily(u"Liberation Sans")
         font.setBold(False)
-        font.setWeight(font.Normal)
+        font.setWeight(QFont.Weight.Normal)
         self.checkBox.setFont(font)
         self.checkBox.setStyleSheet('QCheckBox {color: red;}')
         self.checkBox.setToolTip(u"Pažljivo\nrazmisli dvaput :-)")
