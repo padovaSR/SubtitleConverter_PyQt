@@ -10,9 +10,7 @@ from settings import MAIN_SETTINGS, MULTI_FILE, WORK_TEXT, main_settings_file, l
 from MultiSelection import MultiFiles 
 from ChoiceDialog import MultiChoiceDialog
 from zip_confirm import ZipStructure
-from fixer_settings import FixerSettings
 from settings_dialog import MainSettings
-from merger_settings import MergerSettings
 from merge import myMerger 
 from TextFileProc import FileHandler, DocumentHandler, ErrorsHandler, Transliteracija, normalizeText
 
@@ -21,8 +19,9 @@ from resources.IsCyrillic import checkCyrillicAlphabet
 from resources.ErrorDialog import ErrorDialog
 from resources.renamer import RenameFiles
 from resources.FixSubtitles import SubtitleFixer
+from resources.fixer_settings import FixerSettings
+from resources.merger_settings import MergerSettings
 from resources import ExportZipFile
-from resources import ChangeManually  
  
 import srt
 import re
