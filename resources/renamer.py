@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 class CollectFiles:
     """"""
-    EP = re.compile(r"epi(z|s)od(a|e)\s*-?\s*\W*\s*\d{,2}\.?|s\d{1,2}e\d{1,2}\.?|^\d{1,2}\.srt|\d{1,2}\s*x\s*\d{2}|s\d{1,2}\s*x\s*e\d{1,2}|\d{1,2}\.?\s?(ep)i?(z|s)?o?d?(a|e)?", (re.I|re.M))
+    EP = re.compile(r"epi(z|s)od(a|e)\s*-?\s*\W*\s*\d{,2}\.?|s\d{1,2}e\d{1,2}\.?|^\d{1,2}\.srt|\d{1,2}\s*x\s*\d{2}|s\d{1,2}\s*x\s*e\d{1,2}|\d{1,2}\.?\s?(ep)i?(z|s)?o?d?(a|e)?|^\w+ *\.*\d\d?", (re.I|re.M))
     RP = re.compile(r"\d{4}\w?\.?|(x|h)\.?26(4|5)|N(10|265)|ddp5\.1\.?|\b\w{2,}\b(?<!\d)|[ \.-]|(ION\d{2,3})|(?<=part[.\- ])\d+|s\d\d?e", re.I)
     
     subtitles = []
