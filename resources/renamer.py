@@ -310,6 +310,7 @@ class RenameFiles(Ui_Dialog, QDialog):
         if s_list and renamed:
             try:
                 if len(s_list) == len(renamed) and set(s_list) == set(renamed):
+                    self.updateOriginalField(renamed)
                     flattened_list = "\n".join(s_list)
                     message = "<h4>Fajlovi su uspešno preimenovani</h4>\n"
                     message += f"{flattened_list}"
@@ -317,6 +318,11 @@ class RenameFiles(Ui_Dialog, QDialog):
             except (TypeError, Exception) as e:
                 logger.debug(f"Error: {e}")
     
+    def updateOriginalField(self, listin):
+        self.text_1.clear()
+        for file_name in listin:
+            self.text_1.appendPlainText(file_name)
+            
     def getSelectedFolder(self):
         index = self.treeView.currentIndex()
         file_path = self.model.filePath(index)
