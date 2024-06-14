@@ -285,9 +285,9 @@ class RenameFiles(Ui_Dialog, QDialog):
             if len(new_lines) > 1:
                 pl_name = f"{basename(self.current_path)}.m3u"
                 pl_file = join(self.current_path, pl_name)
-                with open(pl_file, "w", encoding="utf-8") as pl:
+                with open(pl_file, "w", encoding="utf-8", newline="\r\n") as pl:
                     pl.write(f"#{basename(pl_file)[:-4]} Playlist\n")
-                playlist = open(pl_file, "a", encoding="utf-8")
+                playlist = open(pl_file, "a", encoding="utf-8", newline="\r\n")
         for i in range(len(new_lines)):
             try:
                 new_name = join(self.current_path, new_lines[i])
