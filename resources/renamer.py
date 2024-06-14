@@ -375,6 +375,11 @@ class RenameFiles(Ui_Dialog, QDialog):
         self.treeView.hideColumn(3)
         # Set the selection    
         predefined_folder = MAIN_SETTINGS["Renamer"]["Selected"]
+        if not os.path.exists(predefined_folder):
+            try:
+                predefined_folder = dirname(predefined_folder)
+            except:
+                predefined_folder = os.path.expanduser("~")
         index = self.model.index(predefined_folder)
         self.treeView.setCurrentIndex(index)
         self.root_label.setText(os.path.normpath(predefined_folder))
@@ -383,11 +388,6 @@ class RenameFiles(Ui_Dialog, QDialog):
     def writeSettings(self):
         """"""
         current_dir = self.label_2.text()
-        if not os.path.exists(current_dir):
-            try:
-                current_dir = dirname(current_dir)
-            except:
-                current_dir = os.path.expanduser("~")        
         MAIN_SETTINGS["Renamer"] = {"W": self.width(), "H": self.height(), "Selected": current_dir}
         
     def on_close_event(self, event):
