@@ -382,7 +382,13 @@ class RenameFiles(Ui_Dialog, QDialog):
         
     def writeSettings(self):
         """"""
-        MAIN_SETTINGS["Renamer"] = {"W": self.width(), "H": self.height(), "Selected": dirname(self.label_2.text())}
+        current_dir = self.label_2.text()
+        if not os.path.exists(current_dir):
+            try:
+                current_dir = dirname(current_dir)
+            except:
+                current_dir = os.path.expanduser("~")        
+        MAIN_SETTINGS["Renamer"] = {"W": self.width(), "H": self.height(), "Selected": current_dir}
         
     def on_close_event(self, event):
         self.writeSettings()
