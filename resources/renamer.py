@@ -389,6 +389,7 @@ class RenameFiles(Ui_Dialog, QDialog):
         """"""
         current_dir = self.label_2.text()
         MAIN_SETTINGS["Renamer"] = {"W": self.width(), "H": self.height(), "Selected": current_dir}
+        MAIN_SETTINGS["Directory"] = normpath(current_dir)
         
     def on_close_event(self, event):
         self.writeSettings()
