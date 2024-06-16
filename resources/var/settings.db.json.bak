@@ -48,7 +48,7 @@
     "CB_value": "auto",
     "FrameSize": {
         "W": 659,
-        "H": 626
+        "H": 599
     },
     "added_ext": [
         ".fixed",
@@ -68,8 +68,9 @@
         "H": 506
     },
     "Renamer": {
-        "W": 996,
-        "H": 686,
-        "Selected": "C:\\Users\\darkstar\\Desktop"
-    }
+        "W": 897,
+        "H": 762,
+        "Selected": "C:\\Users\\darkstar\\Documents"
+    },
+    "Directory": "C:\\Users\\darkstar\\Documents"
 }
