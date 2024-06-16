@@ -30,7 +30,7 @@ import shutil
 import linecache
 import sys
 import os
-from os.path import join, basename, normpath, exists, splitext
+from os.path import join, basename, normpath, exists, splitext, dirname
 from collections import deque
 from functools import partial
 
@@ -185,15 +185,18 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         
     def onOpen(self):
         # Open a file dialog to select files with the extensions srt, zip, and txt
+        last_opened = MAIN_SETTINGS["Directory"]
+        if not os.path.exists(last_opened):
+            last_opened = os.path.expanduser("~")
         filenames, _ = QFileDialog.getOpenFileNames(
             self,
             "Select files",
-            "",
+            last_opened,
             "SubRip (*.srt *.txt *.zip);;All files (*.*)",
             options=QFileDialog.ReadOnly
         )
-        
         if filenames:
+            MAIN_SETTINGS["Directory"] = normpath(dirname(filenames[0]))
             self.OpenFiles(filenames)    
     
     def OpenFiles(self, file_paths):
