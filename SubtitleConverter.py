@@ -2,8 +2,8 @@
 
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QDialog, QFontDialog, QColorDialog, QMessageBox
-from PySide6.QtGui import QFont, QTextCursor, QAction, QScreen
-from PySide6.QtCore import Qt, QFileInfo, QDir, QEventLoop, QTimer, QSettings, QSize, QPoint, QRect
+from PySide6.QtGui import QFont, QTextCursor, QAction
+from PySide6.QtCore import Qt, QFileInfo, QDir, QEventLoop, QTimer, QSettings, QSize, QPoint
 
 from sc_gui import Ui_MainWindow
 from settings import MAIN_SETTINGS, MULTI_FILE, WORK_TEXT, main_settings_file, log_file_history, printEncoding, updateRecentFiles
@@ -59,13 +59,13 @@ class MyFileDialog(QFileDialog):
             last_size = self.settings.value("FileDialogSize", QSize(800, 600))  # Default size for file dialog
         self.resize(last_size)
 
-        # Center the dialog at the top of the screen
+        # Center the dialog vertically and horizontally on the screen
         screen = QApplication.primaryScreen()
         screen_rect = screen.availableGeometry()
         dialog_rect = self.frameGeometry()
         dialog_x = screen_rect.center().x() - dialog_rect.width() // 2
-        dialog_y = screen_rect.top()  # Top of the screen
-        self.move(QPoint(dialog_x, dialog_y))
+        dialog_y = screen_rect.center().y() - dialog_rect.height() // 2 # Vertical centering
+        self.move(QPoint(dialog_x, dialog_y))        
 
     def exec(self):
         result = super(MyFileDialog, self).exec()
