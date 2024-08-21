@@ -173,6 +173,18 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         
         MAIN_SETTINGS["CB_value"] = self.comboBox.currentText()
         
+    def showEvent(self, event):
+        # Center the window on the screen when it's shown
+        self.centerWindow()
+        super(MainWindow, self).showEvent(event)
+    
+    def centerWindow(self):
+        screen = QApplication.primaryScreen().availableGeometry() # PySide6
+        window_rect = self.frameGeometry()
+        window_x = screen.center().x() - window_rect.width() // 2
+        window_y = screen.center().y() - window_rect.height() // 2
+        self.move(QPoint(window_x, window_y))        
+        
         
     def displayFiles(self, files):
         # Set the text color to light gray
