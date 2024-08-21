@@ -2,8 +2,8 @@
 
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QDialog, QFontDialog, QColorDialog, QMessageBox
-from PySide6.QtGui import QFont, QTextCursor, QAction
-from PySide6.QtCore import Qt, QFileInfo, QDir, QEventLoop, QTimer
+from PySide6.QtGui import QFont, QTextCursor, QAction, QScreen
+from PySide6.QtCore import Qt, QFileInfo, QDir, QEventLoop, QTimer, QSettings, QSize, QPoint, QRect
 
 from sc_gui import Ui_MainWindow
 from settings import MAIN_SETTINGS, MULTI_FILE, WORK_TEXT, main_settings_file, log_file_history, printEncoding, updateRecentFiles
@@ -39,6 +39,59 @@ logging.config.fileConfig("resources/var/log/mainlog.ini", disable_existing_logg
 logger = logging.getLogger(__name__)
 
 
+class MyFileDialog(QFileDialog):
+    def __init__(self, parent=None, caption='', directory='', filter='', file_mode=QFileDialog.AnyFile, options=QFileDialog.Options()):
+        super(MyFileDialog, self).__init__(parent, caption, directory, filter)
+        self.setFileMode(file_mode)
+        self.setOptions(options)
+        self.setWindowFlags(Qt.Window | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
+        self.setWindowModality(Qt.WindowModal)
+        
+        settings_directory = os.path.join("resources", "var")
+        settings_file_path = os.path.join(settings_directory, "FileDialogSettings.ini")        
+        
+        self.settings = QSettings(settings_file_path, QSettings.IniFormat)
+        
+        # Restore the last size
+        if file_mode == QFileDialog.Directory:
+            last_size = self.settings.value("DirDialogSize", QSize(600, 400))  # Default size for directory dialog
+        else:
+            last_size = self.settings.value("FileDialogSize", QSize(800, 600))  # Default size for file dialog
+        self.resize(last_size)
+
+        # Center the dialog at the top of the screen
+        screen = QApplication.primaryScreen()
+        screen_rect = screen.availableGeometry()
+        dialog_rect = self.frameGeometry()
+        dialog_x = screen_rect.center().x() - dialog_rect.width() // 2
+        dialog_y = screen_rect.top()  # Top of the screen
+        self.move(QPoint(dialog_x, dialog_y))
+
+    def exec(self):
+        result = super(MyFileDialog, self).exec()
+        # Save the current size regardless of whether the dialog was accepted or rejected
+        if self.fileMode() == QFileDialog.Directory:
+            self.settings.setValue("DirDialogSize", self.size())
+        else:
+            self.settings.setValue("FileDialogSize", self.size())
+        return result
+
+    @staticmethod
+    def getOpenFileNames(parent=None, caption='', directory='', filter='', options=QFileDialog.Options()):
+        dialog = MyFileDialog(parent, caption, directory, filter, QFileDialog.ExistingFiles, options)
+        if dialog.exec() == QDialog.Accepted:
+            return dialog.selectedFiles(), dialog.selectedNameFilter()
+        else:
+            return [], ''
+
+    @staticmethod
+    def getExistingDirectory(parent=None, caption='', directory='', options=QFileDialog.ShowDirsOnly):
+        dialog = MyFileDialog(parent, caption, directory, '', QFileDialog.Directory, options)
+        if dialog.exec() == QDialog.Accepted:
+            return dialog.selectedFiles()[0]  # Return the selected directory
+        else:
+            return ''
+        
 class MainWindow(Ui_MainWindow, QMainWindow):
     
     def __init__(self, parent=None):
@@ -188,12 +241,12 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         last_opened = MAIN_SETTINGS["Directory"]
         if not os.path.exists(last_opened):
             last_opened = os.path.expanduser("~")
-        filenames, _ = QFileDialog.getOpenFileNames(
+        filenames, _ = MyFileDialog.getOpenFileNames(
             self,
             "Select files",
             last_opened,
             "SubRip (*.srt *.txt *.zip);;All files (*.*)",
-            options=QFileDialog.ReadOnly
+            options=MyFileDialog.ReadOnly
         )
         if filenames:
             MAIN_SETTINGS["Directory"] = normpath(dirname(filenames[0]))
@@ -237,7 +290,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         
     def onOpenMultiple(self):
         """"""
-        path = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
+        path = str(MyFileDialog.getExistingDirectory(self, "Select Directory"))
         if path:
             dlg = MultiFiles(path)
             dlg.exec()
