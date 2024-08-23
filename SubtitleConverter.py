@@ -92,6 +92,14 @@ class MyFileDialog(QFileDialog):
         else:
             return ''
         
+    @staticmethod
+    def getSaveFileName(parent=None, caption='', directory='', filter='', options=QFileDialog.Options()):
+        dialog = MyFileDialog(parent, caption, directory, filter, QFileDialog.AnyFile, options)
+        if dialog.exec() == QDialog.Accepted:
+            return dialog.selectedFiles()[0], dialog.selectedNameFilter()
+        else:
+            return '', ''    
+        
 class MainWindow(Ui_MainWindow, QMainWindow):
     
     def __init__(self, parent=None):
@@ -667,10 +675,10 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             logger.debug(f"ReplaceSpecial Error: {e}")
             return
             
-    def onChangeManually(self):
-        """"""
-        dlg = ChangeManually.MiniEditor()
-        dlg.exec()
+    #def onChangeManually(self):
+        #""""""
+        #dlg = ChangeManually.MiniEditor()
+        #dlg.exec()
         
     def SaveFile(self):
         """"""
@@ -690,7 +698,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         """"""
         FileToSave = self.single_file or "Untitled.txt"
         Enc_saved = self.file_enc or "utf-8"
-        fileName, _ = QFileDialog.getSaveFileName(
+        fileName, _ = MyFileDialog.getSaveFileName(
             self, str("Save File"), FileToSave, "SubRip (*.srt *.txt);; All files (*.*)"
         )
         if fileName:
