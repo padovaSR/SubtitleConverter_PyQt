@@ -9,7 +9,7 @@
 
 * On Linux systems, open your favorite terminal or console.<br>
 On Windows, after opening the Start menu, type  **cmd** or **Command Prompt** on your keyboard to find the terminal.
-* In terminal type required **commands**, and after each command hit **Enter** key.
+* In terminal type required **commands**, and after each command hit the **Enter** key.
 <br>&nbsp;
 #### Create virtual environment on top of an existing Python installation:
 ```sh
@@ -38,7 +38,8 @@ pip install -r requirements.txt
 ```
 #### Rename or copy file **SubtitleConverter.py**:
 ```sh
-cat SubtitleConverter.py > SubtitleConverter.pyw
+cat SubtitleConverter.py > SubtitleConverter.pyw	(Linux)
+type SubtitleConverter.py > SubtitleConverter.pyw	(Windows)
 ```
 #### Run the file:
 ```sh
