@@ -152,7 +152,7 @@ class SubtitleFixer:
                     m = 0
                     s1 = 0
                     subs = list(srt.parse(self.text_in, ignore_errors=True))
-                    x, y = FixGaps(inlist=subs, mingap=_gap)
+                    x, y = FixGaps(inlist=subs, mingap=_gap) # Expand gaps
                     m += x
                     s1 += y
                 else: logger.debug("Fixer: Remove gaps not enabled.")
