@@ -5,7 +5,7 @@ import sys
 sys.path.append("../")
 
 from settings import MAIN_SETTINGS, WORK_TEXT
-from merge import ShrinkGap, FixSubGaps
+from merge import ShrinkGap, FixGaps
 from resources.DictHandle import Dictionaries 
 
 import srt
@@ -152,7 +152,7 @@ class SubtitleFixer:
                     m = 0
                     s1 = 0
                     subs = list(srt.parse(self.text_in, ignore_errors=True))
-                    x, y = FixSubGaps(inlist=subs, mingap=_gap).powerSubs()
+                    x, y = FixGaps(inlist=subs, mingap=_gap)
                     m += x
                     s1 += y
                 else: logger.debug("Fixer: Remove gaps not enabled.")
