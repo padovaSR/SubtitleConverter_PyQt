@@ -156,7 +156,7 @@ def FixGaps(inlist, mingap):
     return gaps, overlaps
 
 def ShrinkGap(inlist, maxgap, mingap=1):
-    """Optimize the gap between subtitles in an .srt file."""
+    """Optimize the gap between subtitles."""
     
     gaps = 0
     new_subtitles = []
