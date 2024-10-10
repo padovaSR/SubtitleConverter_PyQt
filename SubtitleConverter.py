@@ -659,7 +659,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         try:
             text = self.text_1.toPlainText()
             ext = splitext(splitext(self.single_file)[0])[1].strip(".")
-            if re.search("(x|h)\.?264|ION(10|265)|\d{3,4}", ext, re.I) or len(ext) > 8:
+            if re.search(r"(x|h)\.?264|ION(10|265)|\d{3,4}", ext, re.I) or len(ext) > 8:
                 ext= ""            
             handler = SubtitleFixer()
             num, text_o = handler.doReplace(text)
