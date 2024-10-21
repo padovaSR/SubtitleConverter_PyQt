@@ -7,8 +7,8 @@
 ##
 
 from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QIcon, QFont, QStandardItem, QStandardItemModel
-from PySide6.QtWidgets import (QDialog, QApplication, QVBoxLayout, QLabel, QSplitter, QLineEdit, QListView, QToolButton, 
+from PySide6.QtGui import QIcon, QFont
+from PySide6.QtWidgets import (QDialog, QApplication, QVBoxLayout, QLabel, QSplitter, QLineEdit, QListWidget, QToolButton, QListWidgetItem, 
                                QRadioButton, QAbstractItemView, QCheckBox, QDialogButtonBox, QFileDialog, QSizePolicy, QProgressBar)
 
 from settings import I_PATH, MAIN_SETTINGS
@@ -127,15 +127,13 @@ class Ui_Dialog(object):
 
         self.verticalLayout.addWidget(self.splitter_2)
         
-        self.model = QStandardItemModel()
         
-        self.listView = QListView(Dialog)
-        self.listView.setObjectName(u"listView")
-        self.listView.setModel(self.model)
-        self.listView.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.listView.setAlternatingRowColors(True)
-        self.listView.setSelectionMode(QAbstractItemView.ContiguousSelection)
-        self.verticalLayout.addWidget(self.listView)
+        self.listWidget = QListWidget(Dialog)
+        self.listWidget.setObjectName(u"listWidget")
+        self.listWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.listWidget.setAlternatingRowColors(True)
+        self.listWidget.setSelectionMode(QAbstractItemView.ContiguousSelection)
+        self.verticalLayout.addWidget(self.listWidget)
 
         self.splitter = QSplitter(Dialog)
         self.splitter.setObjectName(u"splitter")
@@ -181,12 +179,12 @@ class MultiFiles(Ui_Dialog, QDialog):
         self.setupUi(self)
         self.file_path = file_path
         
-        self.buttonSearch.clicked.connect(lambda:self.searchDir())
-        self.buttonGo.clicked.connect(lambda:self.populateList())
-        self.buttonBox.accepted.connect(lambda:self.GetSelections())
+        self.buttonSearch.clicked.connect(self.searchDir)
+        self.buttonGo.clicked.connect(self.populateList)
+        self.buttonBox.accepted.connect(self.GetSelections)
         self.buttonBox.rejected.connect(self.onRejected)
         self.checkBox.clicked.connect(self.on_Checked)
-        self.model.itemChanged.connect(lambda:self.onSelected())
+        self.listWidget.itemChanged.connect(self.onSelected)
         self.finished.connect(self.writeSettings)
         
         self.populateList()
@@ -203,8 +201,8 @@ class MultiFiles(Ui_Dialog, QDialog):
         self.lineEdit.setText(path)
         self.progressBar.setValue(0)
         self.file_path = path
-        self.model.clear()
-        self.label_1.setText(f"Broj fajlova: {self.model.rowCount()}")
+        self.listWidget.clear()
+        self.label_1.setText(f"Broj fajlova: {self.listWidget.count()}")
         
     def getFilesList(self, ext):
         if self.rButtonSCAN.isChecked():
@@ -214,9 +212,11 @@ class MultiFiles(Ui_Dialog, QDialog):
             
     def populateList(self):
         FilesList = []
-        self.model.clear()
+        self.listWidget.clear()
         self.checkBox.setCheckState(Qt.Unchecked)
         self.progressBar.setValue(0)
+    
+        # Set file path based on input or defaults
         if self.file_path and not self.lineEdit.text():
             self.lineEdit.setText(self.file_path)
         elif self.lineEdit.text():
@@ -225,50 +225,61 @@ class MultiFiles(Ui_Dialog, QDialog):
             if sys.platform.startswith("linux"):
                 self.file_path = os.path.expanduser('~/Documents')
             else:
-                self.file_path = os.path.expanduser('~\Documents')
+                self.file_path = os.path.expanduser('~\\Documents')
             self.lineEdit.setText(self.file_path)
+    
         try:
+            # Populate file list based on selected file types
             if self.rButtonSRT.isChecked():
                 FilesList.extend(self.getFilesList("*.srt"))
             if self.rButtonTXT.isChecked():
                 FilesList.extend(self.getFilesList("*.txt"))
             if self.rButtonZIP.isChecked():
                 FilesList.extend(self.getFilesList("*.zip"))
+    
+            # Set progress bar maximum to number of files
             n = len(FilesList)
             self.progressBar.setMaximum(n)
-            for i in range(len(FilesList)):
-                item = QStandardItem(f"{FilesList[i]}")
-                item.setCheckable(True)
-                item.setCheckState(Qt.Unchecked)
-                self.model.appendRow(item)
-                self.progressBar.setValue(i+1)
-            self.label_1.setText(f"Broj fajlova: {self.model.rowCount()}")
+    
+            # Add each file as a QListWidgetItem with a checkbox
+            for i, file_name in enumerate(FilesList):
+                item = QListWidgetItem(str(file_name))
+                item.setCheckState(Qt.Unchecked)  # Add checkbox
+                self.listWidget.addItem(item)  # Use addItem for QListWidget
+                self.progressBar.setValue(i + 1)
+    
+            # Update the label to show the number of files
+            self.label_1.setText(f"Broj fajlova: {self.listWidget.count()}")
+    
+            # Call a method for additional processing
             self.onSelected()
+    
         except Exception as e:
             logger.debug(f"Populate: {e}")
         
     def GetSelections(self):
         self.choices = [
-            self.model.item(i).text()
-            for i in range(self.model.rowCount())
-            if self.model.item(i).checkState() is Qt.Checked
+            self.listWidget.item(i).text()
+            for i in range(self.listWidget.count())
+            if self.listWidget.item(i).checkState() is Qt.Checked
         ]
         self.accept()
         return self.choices
     
     def onSelected(self):
-        check_items = [self.model.item(i).checkState() for i in range(self.model.rowCount())]
+        check_items = [self.listWidget.item(i).checkState() for i in range(self.listWidget.count())]
         n = sum(1 for item in check_items if item is Qt.Checked)
         self.label_2.setText(f"Selektovanih fajlova: {n}")
     
     def onCheckBox(self):
         state = self.checkBox.checkState()
+        self.listWidget.setUniformItemSizes(True)
         self.progressBar.setValue(0)
-        n_row = self.model.rowCount()
+        n_row = self.listWidget.count()
         t_sleep = 0
         if n_row > 300: t_sleep = 0.01 
         for i in range(n_row):
-            self.model.item(i).setCheckState(state)
+            self.listWidget.item(i).setCheckState(state)
             self.progressBar.setValue(i+1)
             time.sleep(t_sleep)
         
@@ -276,7 +287,7 @@ class MultiFiles(Ui_Dialog, QDialog):
         MAIN_SETTINGS["MultiSelection"] = {"W": self.width(), "H": self.height()}
         
     def closeEvent(self, event):
-        self.listView.model().clear()
+        self.listWidget.clear()
         self.accept()
         
     def onRejected(self):
