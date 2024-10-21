@@ -24,6 +24,30 @@ import logging.config
 logger = logging.getLogger(__name__)
 
 
+class MyListWidget(QListWidget):
+    def __init__(self, parent=None):
+        super(MyListWidget, self).__init__(parent)
+        self.setSelectionMode(QListWidget.MultiSelection)  # Allow selecting multiple items
+        self.setAlternatingRowColors(True)
+
+        self.setToolTip(f"Select multiple items and press\nthe spacebar to check/uncheck them.")
+
+    def keyPressEvent(self, event):
+        # Check if the spacebar is pressed
+        if event.key() == Qt.Key_Space:
+            # Get selected items
+            selected_items = self.selectedItems()
+            
+            # Iterate over selected items and toggle check state
+            for item in selected_items:
+                if item.checkState() == Qt.Checked:
+                    item.setCheckState(Qt.Unchecked)
+                else:
+                    item.setCheckState(Qt.Checked)
+        else:
+            # Call the base class method for other keys
+            super(MyListWidget, self).keyPressEvent(event)
+
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
@@ -127,7 +151,8 @@ class Ui_Dialog(object):
         self.verticalLayout.addWidget(self.splitter_2)
         
         
-        self.listWidget = QListWidget(Dialog)
+        #self.listWidget = QListWidget(Dialog)
+        self.listWidget = MyListWidget(Dialog)
         self.listWidget.setObjectName(u"listWidget")
         self.listWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.listWidget.setAlternatingRowColors(True)
