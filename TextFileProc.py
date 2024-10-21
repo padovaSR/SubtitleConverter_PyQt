@@ -521,7 +521,7 @@ class ErrorsHandler:
             for subtitle in subs:
                 if re.search(FP, subtitle.content):
                     sl.append(subtitle)
-                if re.match("^[\s\?\n]*$", subtitle.content.replace('\n','?')):
+                if re.match(r"^[\s\?\n]*$", subtitle.content.replace('\n','?')):
                     sl.append(subtitle)
             if len(sl) > 0:
                 try:
@@ -640,7 +640,7 @@ class Transliteracija(DocumentHandler):
 
                 rd = {"Љ": "Lj", "Њ": "Nj", "Џ": "Dž", "љ": "lj", "њ": "nj", "џ": "dž"}
 
-                f_reg = re.compile("<[^<]*?>|www\.\w+\.\w+", (re.I | re.M))
+                f_reg = re.compile(r"<[^<]*?>|www\.\w+\.\w+", (re.I | re.M))
 
                 cf = f_reg.findall(text_ch)
 
