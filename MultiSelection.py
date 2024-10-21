@@ -9,11 +9,10 @@
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QIcon, QFont
 from PySide6.QtWidgets import (QDialog, QApplication, QVBoxLayout, QLabel, QSplitter, QLineEdit, QListWidget, QToolButton, QListWidgetItem, 
-                               QRadioButton, QAbstractItemView, QCheckBox, QDialogButtonBox, QFileDialog, QSizePolicy, QProgressBar)
+                               QRadioButton, QAbstractItemView, QCheckBox, QDialogButtonBox, QFileDialog, QSizePolicy, QProgressBar, QProgressDialog)
 
 from settings import I_PATH, MAIN_SETTINGS
 
-import threading
 import time
 from os.path import join
 import os
@@ -183,19 +182,12 @@ class MultiFiles(Ui_Dialog, QDialog):
         self.buttonGo.clicked.connect(self.populateList)
         self.buttonBox.accepted.connect(self.GetSelections)
         self.buttonBox.rejected.connect(self.onRejected)
-        self.checkBox.clicked.connect(self.on_Checked)
+        self.checkBox.stateChanged.connect(self.onCheckBox)
         self.listWidget.itemChanged.connect(self.onSelected)
         self.finished.connect(self.writeSettings)
         
         self.populateList()
         
-    def on_Checked(self, event):
-        # Create a new thread to run the long-running method
-        thread = threading.Thread(target=self.onCheckBox)
-        # Start the thread
-        thread.start()
-        thread.join()
-         
     def searchDir(self):
         path = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
         self.lineEdit.setText(path)
@@ -271,17 +263,28 @@ class MultiFiles(Ui_Dialog, QDialog):
         n = sum(1 for item in check_items if item is Qt.Checked)
         self.label_2.setText(f"Selektovanih fajlova: {n}")
     
-    def onCheckBox(self):
+    def onCheckBox(self, state):
         state = self.checkBox.checkState()
         self.listWidget.setUniformItemSizes(True)
         self.progressBar.setValue(0)
         n_row = self.listWidget.count()
+        progress_dialog = QProgressDialog("Checking items...", "Cancel", 0, n_row - 1, self)
+        progress_dialog.setWindowTitle("Processing")
+        progress_dialog.setWindowModality(Qt.WindowModal)
+        progress_dialog.setAutoClose(True)  # Automatically close when finished
+        #progress_dialog.setAutoReset(True)  # Reset automatically for reuse
+        #self.listWidget.setUpdatesEnabled(False)        
         t_sleep = 0
-        if n_row > 300: t_sleep = 0.01 
+        if n_row > 300: t_sleep = 0.008 
         for i in range(n_row):
             self.listWidget.item(i).setCheckState(state)
             self.progressBar.setValue(i+1)
             time.sleep(t_sleep)
+            progress_dialog.setValue(i)  # Update the progress bar
+            
+            # Check if the user canceled the operation
+            if progress_dialog.wasCanceled():
+                break            
         
     def writeSettings(self):
         MAIN_SETTINGS["MultiSelection"] = {"W": self.width(), "H": self.height()}
