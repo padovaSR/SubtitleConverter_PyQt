@@ -211,7 +211,7 @@ class SubtitleFixer:
             r"(\s*?)$|(^\s*?\.+)$|(^\s*?,+)$|(^\s*?;+)$|(^\s*?!+\s*?)$|(^\s*?\?+\s*?)$",
             re.M,
         )
-        reg_S9 = re.compile("(?<=,\d\d\d)\n\n(?=\w)|(?<=,\d\d\d)\n\n(?=\s*\S*?)", re.M)
+        reg_S9 = re.compile(r"(?<=,\d\d\d)\n\n(?=\w)|(?<=,\d\d\d)\n\n(?=\s*\S*?)", re.M)
         reg8a = re.compile(
             r'^\s*(?<=.)|^-(?<=$)', re.M
         )  # Spejs na pocetku linije, i crtica na početku prazne linije
