@@ -183,9 +183,9 @@ class ZipStructure(Ui_Dialog, QDialog):
         self.setAcceptDrops(True)
         first_path = basename(self.file_name)
         if sys.platform.startswith("linux"):
-            first_path=normpath(join(expanduser("~/Desktop"), first_path))
+            first_path=normpath(join(expanduser(r"~/Desktop"), first_path))
         elif sys.platform.startswith("win"):
-            first_path=normpath(join(expanduser("~\Desktop"), first_path))
+            first_path=normpath(join(expanduser(r"~\Desktop"), first_path))
         self.lineEdit.setText(first_path)
         self.populateTreeView()
         
