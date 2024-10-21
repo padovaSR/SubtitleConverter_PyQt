@@ -675,11 +675,6 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             logger.debug(f"ReplaceSpecial Error: {e}")
             return
             
-    #def onChangeManually(self):
-        #""""""
-        #dlg = ChangeManually.MiniEditor()
-        #dlg.exec()
-        
     def SaveFile(self):
         """"""
         FileToSave = self.single_file
