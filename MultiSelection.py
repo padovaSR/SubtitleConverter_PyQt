@@ -13,7 +13,6 @@ from PySide6.QtWidgets import (QDialog, QApplication, QVBoxLayout, QLabel, QSpli
 
 from settings import I_PATH, MAIN_SETTINGS
 
-import time
 from os.path import join
 import os
 from pathlib import Path
@@ -299,12 +298,9 @@ class MultiFiles(Ui_Dialog, QDialog):
         progress_dialog.setAutoClose(True)  # Automatically close when finished
         #progress_dialog.setAutoReset(True)  # Reset automatically for reuse
         #self.listWidget.setUpdatesEnabled(False)        
-        t_sleep = 0
-        if n_row > 300: t_sleep = 0.008 
         for i in range(n_row):
             self.listWidget.item(i).setCheckState(state)
             self.progressBar.setValue(i+1)
-            time.sleep(t_sleep)
             progress_dialog.setValue(i)  # Update the progress bar
             
             # Check if the user canceled the operation
