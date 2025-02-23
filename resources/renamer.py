@@ -28,8 +28,9 @@ logger = logging.getLogger(__name__)
 
 class CollectFiles:
     """"""
-    EP = re.compile(r"epi(z|s)od(a|e)\s*-?\s*\W*\s*\d{,2}\.?|s\d{1,2}e\d{1,2}\.?|^\d{1,2}\.srt|\d{1,2}\s*x\s*\d{2}|s\d{1,2}\s*x\s*e\d{1,2}|\d{1,2}\.?\s?(ep)i?(z|s)?o?d?(a|e)?|^\w+ *\.*\d\d?", (re.I|re.M))
-    RP = re.compile(r"\d{4}\w?\.?|(x|h)\.?26(4|5)|N(10|265)|ddp5\.1\.?|\b\w{2,}\b(?<!\d)|[ \.-]|(ION\d{2,3})|(?<=part[.\- ])\d+|s\d+e|([a-z]+\.+){1,5}|\d+\.(?=s[0-9])|(\([^\)]*\))|se(a|z)s*ona*\s*\d{1,2}", re.I)
+    RP\
+        =re.compile(r"\d{4}\w?\.?|(x|h)\.?26(4|5)|N(10|265)|ddp5\.1\.?|\b\w{2,}\b(?<!\d)|[\.-]|(ION\d{2,3})|(?<=part[.\-])\d+|s\d+e|\
+        ([a-z]+\.+){1,5}|[a-z\ ]|\d+\.(?=s[0-9])|(\([^\)]*\))|se(a|z)s*ona*\s*\d{1,2}|\d{1,2}x",re.I)    
     
     subtitles = []
     def __init__(self, selected_folder=None):
@@ -61,8 +62,8 @@ class CollectFiles:
         try:
             if len(subs) > 1 and len(vids) > 1:
                 for pair in zip(subs, vids):
-                    a = int(re.match(r"\d{1,2}", self.RP.sub("", pair[0])).group(0))
-                    b = int(re.match(r"\d{1,2}", self.RP.sub("", pair[1])).group(0))
+                    a = int(re.match(r"\D*(\d{1,2})", self.RP.sub("", pair[0])).group(1))
+                    b = int(re.match(r"\D*(\d{1,2})", self.RP.sub("", pair[1])).group(1))
                     a = max(0, a - 1)
                     b = max(0, b - 1)
                     
