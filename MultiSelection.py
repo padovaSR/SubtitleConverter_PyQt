@@ -256,7 +256,7 @@ class MultiFiles(Ui_Dialog, QDialog):
             # Set progress bar maximum to number of files
             n = len(FilesList)
             self.progressBar.setMaximum(n)
-    
+            self.listWidget.setUniformItemSizes(True)
             # Add each file as a QListWidgetItem with a checkbox
             for i, file_name in enumerate(FilesList):
                 item = QListWidgetItem(str(file_name))
